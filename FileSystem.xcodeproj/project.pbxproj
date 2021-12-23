@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		5F60A6032762B6250001804A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6022762B6250001804A /* main.swift */; };
+		5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6092762B6300001804A /* FileSystemDriver.swift */; };
+		5F60A60C2762B6340001804A /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60B2762B6340001804A /* Block.swift */; };
+		5F60A60E2762B6410001804A /* Descriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60D2762B6410001804A /* Descriptor.swift */; };
+		5F60A6102762B7480001804A /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60F2762B7480001804A /* Constants.swift */; };
+		5F60A6122762BB2E0001804A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6112762BB2E0001804A /* Logger.swift */; };
+		5F60A6142762BB790001804A /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6132762BB790001804A /* Command.swift */; };
+		5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C430276FBA6500F427ED /* BitMap.swift */; };
+		5FF3C433276FBEBF00F427ED /* ByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C432276FBEBF00F427ED /* ByteArray.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +33,14 @@
 /* Begin PBXFileReference section */
 		5F60A5FF2762B6250001804A /* FileSystem */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FileSystem; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F60A6022762B6250001804A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		5F60A6092762B6300001804A /* FileSystemDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemDriver.swift; sourceTree = "<group>"; };
+		5F60A60B2762B6340001804A /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
+		5F60A60D2762B6410001804A /* Descriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Descriptor.swift; sourceTree = "<group>"; };
+		5F60A60F2762B7480001804A /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		5F60A6112762BB2E0001804A /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		5F60A6132762BB790001804A /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		5FF3C430276FBA6500F427ED /* BitMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitMap.swift; sourceTree = "<group>"; };
+		5FF3C432276FBEBF00F427ED /* ByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteArray.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +74,14 @@
 			isa = PBXGroup;
 			children = (
 				5F60A6022762B6250001804A /* main.swift */,
+				5F60A60B2762B6340001804A /* Block.swift */,
+				5F60A60F2762B7480001804A /* Constants.swift */,
+				5F60A60D2762B6410001804A /* Descriptor.swift */,
+				5F60A6092762B6300001804A /* FileSystemDriver.swift */,
+				5F60A6112762BB2E0001804A /* Logger.swift */,
+				5F60A6132762BB790001804A /* Command.swift */,
+				5FF3C430276FBA6500F427ED /* BitMap.swift */,
+				5FF3C432276FBEBF00F427ED /* ByteArray.swift */,
 			);
 			path = FileSystem;
 			sourceTree = "<group>";
@@ -120,6 +144,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F60A6102762B7480001804A /* Constants.swift in Sources */,
+				5F60A6122762BB2E0001804A /* Logger.swift in Sources */,
+				5FF3C433276FBEBF00F427ED /* ByteArray.swift in Sources */,
+				5F60A60C2762B6340001804A /* Block.swift in Sources */,
+				5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */,
+				5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */,
+				5F60A6142762BB790001804A /* Command.swift in Sources */,
+				5F60A60E2762B6410001804A /* Descriptor.swift in Sources */,
 				5F60A6032762B6250001804A /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -248,6 +280,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = M92VXVU7J9;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_TESTABILITY = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -259,6 +292,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = M92VXVU7J9;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_TESTABILITY = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};

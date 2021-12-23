@@ -7,7 +7,20 @@
 		<key>FileSystem.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>1</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>5F60A5FE2762B6250001804A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5FF3C437276FD4B000F427ED</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>
