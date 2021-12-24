@@ -39,8 +39,8 @@ FileSystemDriver.shared.writeFile(to: openedFile1, offset: 0, data: "11111111112
 print(FileSystemDriver.shared.readFile(from: openedFile1, size: nil) ?? "")
 
 let openedFile2 = FileSystemDriver.shared.openFile(with: fileName2)
-FileSystemDriver.shared.writeFile(to: openedFile2, offset: 0, data: "Test")
-print(FileSystemDriver.shared.readFile(from: openedFile2, size: nil) ?? "")
+FileSystemDriver.shared.writeFile(to: openedFile2, offset: 0, data: "1111111111222222222211111111112222222222111111111122222222229999999999888")
+print(FileSystemDriver.shared.readFile(from: openedFile2, size: 70) ?? "")
 
 Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
 

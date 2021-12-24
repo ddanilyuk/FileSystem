@@ -123,7 +123,7 @@ extension FileSystemDriver {
     }
 }
 
-// MARK: - Files
+// MARK: - Create
 
 extension FileSystemDriver {
 
@@ -151,6 +151,12 @@ extension FileSystemDriver {
         
     }
     
+}
+
+// MARK: - Write
+
+extension FileSystemDriver {
+    
     func writeFile(
         to numericOpenedFileDescriptor: Int,
         offset: Int,
@@ -162,109 +168,6 @@ extension FileSystemDriver {
         let descriptor = descriptors[descriptorIndex]
         writeData(to: descriptor, offset: offset, data: data)
         descriptor.size = getNumberOfAllocatedBlock(in: descriptor) * Constants.linkedBlockSize
-    }
-    
-    func readFile(
-        from numericOpenedFileDescriptor: Int,
-        offset: Int = 0,
-        size: Int?
-    ) -> String? {
-        
-        guard let descriptorIndex = openedFiles[numericOpenedFileDescriptor] else {
-            fatalError("File was not opened")
-        }
-        
-        
-        let descriptor = descriptors[descriptorIndex]
-        // Read full if nil
-        let size = size ?? descriptor.size
-        
-        guard offset + size <= descriptor.size else {
-            fatalError("Offset is bigger than size")
-        }
-                
-        return readFrom(descriptor, offset: offset, size: size).toString
-    }
-    
-    func truncateFile(with name: String, size: Int) {
-        
-    }
-}
-
-// MARK: - Links
-
-extension FileSystemDriver {
-
-    func link(to name: String, nameToLink: String) {
-        
-    }
-    
-    func unlink(name: String) {
-        
-    }
-}
-
-// MARK: - Private methods
-
-extension FileSystemDriver {
-    
-    private func getEmptyDescriptor() -> (descriptorIndex: Int, descriptor: Descriptor) {
-        
-        if let (descriptorIndex, descriptor) = descriptors.enumerated().first(where: { !$1.isUsed }) {
-            return (descriptorIndex: descriptorIndex, descriptor: descriptor)
-        } else {
-            fatalError("No available descriptors")
-        }
-    }
-    
-    private func getDescriptorId(
-        with name: String,
-        for blockNumber: Int
-    ) -> Int {
-        let block = blocks[blockNumber]
-        return block.getDescriptorIndex(with: name)
-    }
-
-    private func getEmptyBlockId() -> Int {
-        for index in 0..<Constants.numberOfBlocks {
-            if !blocksBitMap.test(position: index) {
-                blocksBitMap.set(position: index)
-                return index
-            }
-        }
-        fatalError("Out of blocks")
-    }
-    
-    private func initiateFileIn(descriptor: Descriptor) {
-        
-        descriptor.isUsed = true
-        descriptor.mode = .file
-        descriptor.referenceCount = 0
-        descriptor.size = 0
-        descriptor.linksBlocks = []
-    }
-    
-    private func addFileMapping(
-        fileName: String,
-        descriptorIndex: Int,
-        blockNumber: Int
-    ) {
-        
-        let block = blocks[blockNumber]
-        block.createFileMapping(fileName: fileName, descriptorIndex: descriptorIndex)
-    }
-    
-    private func free(descriptor: Descriptor) {
-        
-    }
-    
-    private func generateFD() -> Int {
-        
-        var numericOpenedFileDescriptor: Int
-        repeat {
-            numericOpenedFileDescriptor = Int.random(in: 0..<Int.max)
-        } while openedFiles.keys.contains(numericOpenedFileDescriptor)
-        return numericOpenedFileDescriptor
     }
     
     private func writeData(
@@ -328,15 +231,39 @@ extension FileSystemDriver {
         blocks[blockNumber].mode = .link
         descriptor.linksBlocks.append(blockNumber)
     }
+}
+
+// MARK: - Read
+
+extension FileSystemDriver {
+    
+    func readFile(
+        from numericOpenedFileDescriptor: Int,
+        offset: Int = 0,
+        size: Int?
+    ) -> String? {
+        
+        guard let descriptorIndex = openedFiles[numericOpenedFileDescriptor] else {
+            fatalError("File was not opened")
+        }
+        
+        let descriptor = descriptors[descriptorIndex]
+        // Read full if nil
+        let size = size ?? descriptor.size
+        
+        guard offset + size <= descriptor.size else {
+            fatalError("Offset is bigger than size")
+        }
+                
+        return readFrom(descriptor, offset: offset, size: size).toString
+    }
     
     private func readFrom(_ descriptor: Descriptor, offset: Int, size: Int) -> ByteArray {
         
         let firstBlockOffset = offset % Constants.linkedBlockSize
         let startBlockIndex = offset / Constants.linkedBlockSize
-        let endBlockIndex = startBlockIndex + (size / Constants.linkedBlockSize)
-        
+        let endBlockIndex = startBlockIndex + Int(ceil(CGFloat(size) / CGFloat(Constants.linkedBlockSize)))
         let lastBlockOffset = Constants.linkedBlockSize - ((endBlockIndex - startBlockIndex) * Constants.linkedBlockSize - size - firstBlockOffset)
-        // let lastBlockOffset = (numberOfBlocks * Constants.linkedBlockSize - size - firstBlockOffset) + Constants.intSize
         let blocksToRead = (startBlockIndex..<endBlockIndex).map { descriptor.linksBlocks[$0] }.map { blocks[$0] }
         
         var startIndex = firstBlockOffset
@@ -350,6 +277,90 @@ extension FileSystemDriver {
         }
         return Array(dataChunks.joined())
     }
+    
+    func truncateFile(with name: String, size: Int) {
+        
+    }
+}
+
+// MARK: - Links
+
+extension FileSystemDriver {
+
+    func link(to name: String, nameToLink: String) {
+        
+    }
+    
+    func unlink(name: String) {
+        
+    }
+}
+
+// MARK: - Private methods
+
+extension FileSystemDriver {
+    
+    private func getEmptyDescriptor() -> (descriptorIndex: Int,
+                                          descriptor: Descriptor) {
+        
+        if let (descriptorIndex, descriptor) = descriptors.enumerated().first(where: { !$1.isUsed }) {
+            return (descriptorIndex: descriptorIndex, descriptor: descriptor)
+        } else {
+            fatalError("No available descriptors")
+        }
+    }
+    
+    private func getDescriptorId(
+        with name: String,
+        for blockNumber: Int
+    ) -> Int {
+        let block = blocks[blockNumber]
+        return block.getDescriptorIndex(with: name)
+    }
+
+    private func getEmptyBlockId() -> Int {
+        for index in 0..<Constants.numberOfBlocks {
+            if !blocksBitMap.test(position: index) {
+                blocksBitMap.set(position: index)
+                return index
+            }
+        }
+        fatalError("Out of blocks")
+    }
+    
+    private func initiateFileIn(descriptor: Descriptor) {
+        
+        descriptor.isUsed = true
+        descriptor.mode = .file
+        descriptor.referenceCount = 0
+        descriptor.size = 0
+        descriptor.linksBlocks = []
+    }
+    
+    private func addFileMapping(
+        fileName: String,
+        descriptorIndex: Int,
+        blockNumber: Int
+    ) {
+        
+        let block = blocks[blockNumber]
+        block.createFileMapping(fileName: fileName, descriptorIndex: descriptorIndex)
+    }
+    
+    private func free(descriptor: Descriptor) {
+        
+    }
+    
+    private func generateFD() -> Int {
+        
+        var numericOpenedFileDescriptor: Int
+        repeat {
+            numericOpenedFileDescriptor = Int.random(in: 0..<Int.max)
+        } while openedFiles.keys.contains(numericOpenedFileDescriptor)
+        return numericOpenedFileDescriptor
+    }
+    
+
     
     func getNumberOfAllocatedBlock(in descriptor: Descriptor) -> Int {
         
