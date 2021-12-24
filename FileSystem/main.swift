@@ -40,7 +40,7 @@ print(FileSystemDriver.shared.readFile(from: openedFile2, size: 70) ?? "")
 
 Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
 
-Logger.shared.logBlocks()
+Logger.shared.debug()
 
 FileSystemDriver.shared.link(to: fileName1, nameToLink: "New link")
 
@@ -51,8 +51,16 @@ FileSystemDriver.shared.unlink(name: "New link")
 FileSystemDriver.shared.unlink(name: fileName1)
 
 Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
-Logger.shared.logDescriptors()
-Logger.shared.logBlocks()
+Logger.shared.debug()
+
+
+// truncateFile
+
+print("---")
+FileSystemDriver.shared.truncateFile(with: fileName2, size: 100)
+print(FileSystemDriver.shared.readFile(from: openedFile2, size: nil) ?? "")
+Logger.shared.debug()
+
 
 extension Collection {
     

@@ -118,7 +118,8 @@ extension FileSystemDriver {
                 fileName: fileName,
                 mode: descriptor.mode,
                 referenceCount: descriptor.referenceCount,
-                descriptorIndex: descriptorIndex
+                descriptorIndex: descriptorIndex,
+                size: descriptor.size
             )
         }
     }
@@ -284,6 +285,51 @@ extension FileSystemDriver {
     
     func truncateFile(with name: String, size: Int) {
         
+        let descriptorIndex = getDescriptorId(with: name, for: rootDirectory.linksBlocks[0])
+        let descriptor = descriptors[descriptorIndex]
+        
+        if size > descriptor.size {
+            print("Increasing size")
+            let delta = size - descriptor.size
+            let neededBlocksCount = Int(ceil(CGFloat(delta) / CGFloat(Constants.linkedBlockSize)))
+            for _ in 0..<neededBlocksCount {
+                appendBlock(to: descriptor, blockNumber: getEmptyBlockId())
+            }
+            descriptor.size = getNumberOfAllocatedBlock(in: descriptor) * Constants.linkedBlockSize
+        } else if size < descriptor.size {
+            print("Decreasing size of a file")
+            let neededBlocksCount = Int(ceil(CGFloat(size) / CGFloat(Constants.linkedBlockSize)))
+            let blockDelta = getNumberOfAllocatedBlock(in: descriptor) - neededBlocksCount
+            
+            let deletedBlocks = descriptor.linksBlocks
+                .removeLast(blockDelta)
+
+            let blockTruncateOffset = size % Constants.linkedBlockSize
+            deletedBlocks.forEach { blocksBitMap.reset(position: $0) }
+            if let lastBlockId = descriptor.linksBlocks.last {
+                let block = blocks[lastBlockId]
+//                block.linkChunk()
+                block.setData(data: ByteArray(repeating: 0, count: Constants.linkedBlockSize - blockTruncateOffset), offset: blockTruncateOffset)
+                block.setData(data: [0, 0], offset: Constants.linkedBlockSize)
+//                block.setData(data: ByteArray, offset: blockTruncateOffset)
+            }
+            descriptor.size = getNumberOfAllocatedBlock(in: descriptor) * Constants.linkedBlockSize
+            
+        } else {
+            print("Size was not changed")
+        }
+    }
+}
+
+extension Array {
+    
+    mutating func removeLast(_ numberOfElementsToRemove: Int) -> [Element] {
+        
+//        var array: [Element] = []
+//        (0..<numberOfElementsToRemove).forEach { _ in array.append(removeLast()) }
+//        return array
+        
+        return (0..<numberOfElementsToRemove).map { _ in removeLast() }
     }
 }
 
@@ -409,5 +455,6 @@ extension FileSystemDriver {
         var mode: Descriptor.Mode
         var referenceCount: Int
         var descriptorIndex: Int
+        var size: Int
     }
 }

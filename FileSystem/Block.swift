@@ -173,6 +173,10 @@ final class Block {
             return Array(blockSpace[startIndex..<endIndex])
         }
     }
+    
+    func linkChunk() -> ByteArray {
+        Array(blockSpace[Constants.linkedBlockSize...])
+    }
 }
 
 extension Block: CustomStringConvertible {
