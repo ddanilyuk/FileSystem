@@ -16,7 +16,6 @@ struct OpenCommand: Command {
         print("\n~$ open")
         let result = FileSystemDriver.shared.openFile(with: inputs)
         print("File opened with id: \(result)")
-        print("")
         return result
     }
 }

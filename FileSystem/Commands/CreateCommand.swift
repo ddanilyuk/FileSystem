@@ -17,6 +17,5 @@ struct CreateCommand: Command {
         let rootDirectory = FileSystemDriver.shared.rootDirectory
         FileSystemDriver.shared.createFile(with: name, in: rootDirectory)
         print("File successfully created")
-        print("")
     }
 }

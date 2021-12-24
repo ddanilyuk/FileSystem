@@ -30,6 +30,5 @@ struct LSCommand: Command {
             }
             .joined(separator: "\n")
         print(data)
-        print("")
     }
 }

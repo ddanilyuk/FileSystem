@@ -182,12 +182,16 @@ final class Block {
 extension Block: CustomStringConvertible {
     
     var description: String {
+        
         switch mode {
         case .link:
-            let data = blockSpace[0..<Constants.linkedBlockSize].toFileName.padding(Constants.linkedBlockSize)
-            let link = String(blockSpace[Constants.linkedBlockSize...].toInt)
+            let trimmedCharacterSet = CharacterSet.controlCharacters
+            let data = blockSpace[0..<Constants.linkedBlockSize].toString.trimmingCharacters(in: trimmedCharacterSet).padding(Constants.linkedBlockSize)
+            let linkNumber = blockSpace[Constants.linkedBlockSize...].toInt
+            let link = linkNumber == 0 ? "-" : linkNumber.toString
                 .padding(toLength: 2, withPad: " ", startingAt: 0)
             return data + "|" + link
+            
         case .mappingsAndData:
             return getFilesMappings()
                 .compactMap { fileName, descriptorIndex in

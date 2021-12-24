@@ -10,12 +10,9 @@ import Foundation
 final class FileSystemDriver {
     
     // MARK: - Properties
-    
-    var globalByteArray: ByteArray!
-    
+        
     var blocksBitMap: BitMap!
     
-    // We need somewhere to store all blocks.
     var blocks: [Block]!
     
     var descriptors: [Descriptor] = []
@@ -62,24 +59,21 @@ final class FileSystemDriver {
         descriptor.size = 0
     }
     
-    func generateGlobalByteArray() -> ByteArray {
-        ByteArray(
-            repeating: 0,
-            count: Constants.numberOfBlocks * Constants.blockSize
-        )
-    }
-    
     func generateBlocksBitMap() -> BitMap {
         BitMap(size: Constants.numberOfBlocks)
     }
     
     func generateBlocks() -> [Block] {
-        (0..<Constants.numberOfBlocks).map { index in
+        let byteArray = ByteArray(
+            repeating: 0,
+            count: Constants.numberOfBlocks * Constants.blockSize
+        )
+        return (0..<Constants.numberOfBlocks).map { index in
             let startBlockSpace = Constants.blockSize * index
             let endBlockSpace = Constants.blockSize * index + Constants.blockSize
             return Block(
                 mode: .none,
-                blockSpace: Array(globalByteArray[startBlockSpace..<endBlockSpace])
+                blockSpace: Array(byteArray[startBlockSpace..<endBlockSpace])
             )
         }
     }
@@ -91,14 +85,13 @@ extension FileSystemDriver {
     
     func mountFromMemory() {
         
-        globalByteArray = generateGlobalByteArray()
         blocksBitMap = generateBlocksBitMap()
         blocks = generateBlocks()
     }
     
-    func unmount() {
+    func umount() {
         
-        globalByteArray = nil
+        descriptors = []
         blocksBitMap = nil
         blocks = nil
     }
@@ -208,11 +201,10 @@ extension FileSystemDriver {
         var chunks: [ByteArray] = []
         var startIndex = firstBlockOffset
         var endIndex = min(Constants.linkedBlockSize - firstBlockOffset, dataBytes.count)
-        
         repeat {
             chunks.append(Array(dataBytes[startIndex..<endIndex]))
             startIndex = endIndex
-            endIndex += min(dataBytes.count - Constants.linkedBlockSize, Constants.linkedBlockSize)
+            endIndex += min(dataBytes.count - startIndex, Constants.linkedBlockSize)
         } while startIndex < data.count
         
         blocksToWrite.removeFirst().setData(data: chunks.removeFirst(), offset: offset)
@@ -386,7 +378,7 @@ extension FileSystemDriver {
         let block = blocks[blockNumber]
         return block.getDescriptorIndex(with: name)
     }
-
+    
     private func getEmptyBlockId() -> Int {
         for index in 0..<Constants.numberOfBlocks {
             if !blocksBitMap.test(position: index) {
@@ -429,7 +421,7 @@ extension FileSystemDriver {
         
         var numericOpenedFileDescriptor: Int
         repeat {
-            numericOpenedFileDescriptor = Int.random(in: 0..<Int.max)
+            numericOpenedFileDescriptor = Int.random(in: 0..<Int(UInt16.max))
         } while openedFiles.keys.contains(numericOpenedFileDescriptor)
         return numericOpenedFileDescriptor
     }

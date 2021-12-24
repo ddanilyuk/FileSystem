@@ -17,13 +17,12 @@ struct WriteCommand: Command {
     
     static func execute(_ inputs: InputType) {
         
-        print("\n~$ write")
+        print("\n~$ write \(inputs.numericOpenedFileDescriptor)")
         FileSystemDriver.shared.writeFile(
             to: inputs.numericOpenedFileDescriptor,
             offset: inputs.offset,
             data: inputs.data
         )
-        print("Data successfully written")
-        print("")
+        print("Data:\n\(inputs.data)\nWas successfully written")
     }
 }

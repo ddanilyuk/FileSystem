@@ -11,9 +11,10 @@ struct MKFSCommand: Command {
     
     typealias InputType = Int
     
-    static func execute(_ inputs: InputType) {
+    static func execute(_ numberOfDescriptors: InputType) {
         
-        FileSystemDriver.shared.generateDescriptors(inputs)
-        print("Descriptors generated")
+        print("\n~$ mkfs \(numberOfDescriptors)")
+        FileSystemDriver.shared.generateDescriptors(numberOfDescriptors)
+        print("\(numberOfDescriptors) descriptors generated")
     }
 }
