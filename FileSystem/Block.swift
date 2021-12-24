@@ -131,9 +131,23 @@ final class Block {
     
     // MARK: Delete methods
     
+    @discardableResult
     func deleteFileMapping(with name: String) -> Bool {
         
-        return false
+        let chunk = mappingChunks().enumerated().first { index, chunk in
+            guard !chunk.isClear else {
+                return false
+            }
+            let fileName = chunk[..<Constants.fileNameSize].toFileName
+            return fileName == name
+        }
+        
+        if let chunk = chunk {
+            setData(data: ByteArray(repeating: 0, count: Constants.mappingSize), offset: chunk.offset * Constants.mappingSize)
+            return true
+        } else {
+            return false
+        }
     }
     
     // MARK: - Private methods
@@ -157,6 +171,29 @@ final class Block {
             let startIndex = index * mappingSize
             let endIndex = index * mappingSize + mappingSize
             return Array(blockSpace[startIndex..<endIndex])
+        }
+    }
+}
+
+extension Block: CustomStringConvertible {
+    
+    var description: String {
+        switch mode {
+        case .link:
+            let data = blockSpace[0..<Constants.linkedBlockSize].toFileName.padding(Constants.linkedBlockSize)
+            let link = String(blockSpace[Constants.linkedBlockSize...].toInt)
+                .padding(toLength: 2, withPad: " ", startingAt: 0)
+            return data + "|" + link
+        case .mappingsAndData:
+            return getFilesMappings()
+                .compactMap { fileName, descriptorIndex in
+                    let fileName = fileName.padding(Constants.fileNameSize)
+                    let descriptorIndex = String(descriptorIndex).padding(Constants.intSize)
+                    return "\(fileName)\(descriptorIndex)"
+                }
+                .joined(separator: "|")
+        default:
+            return ""
         }
     }
 }

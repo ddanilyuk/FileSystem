@@ -57,6 +57,7 @@ final class FileSystemDriver {
         descriptor.isUsed = true
         descriptor.mode = .directory
         descriptor.referenceCount = 1
+        blocks[emptyBlockId].mode = .mappingsAndData
         descriptor.linksBlocks = [emptyBlockId]
         descriptor.size = 0
     }
@@ -116,7 +117,7 @@ extension FileSystemDriver {
             return LSDescription(
                 fileName: fileName,
                 mode: descriptor.mode,
-                referenceCount: descriptor.size,
+                referenceCount: descriptor.referenceCount,
                 descriptorIndex: descriptorIndex
             )
         }
@@ -147,10 +148,13 @@ extension FileSystemDriver {
         return numericOpenedFileDescriptor
     }
     
-    func closeFile(with descriptorId: Int) {
-        
+    func closeFile(with numericOpenedFileDescriptor: Int) {
+        guard openedFiles[numericOpenedFileDescriptor] != nil else {
+            fatalError("File was not opened")
+        }
+        openedFiles.removeValue(forKey: numericOpenedFileDescriptor)
+        print("File closed")
     }
-    
 }
 
 // MARK: - Write
@@ -289,10 +293,28 @@ extension FileSystemDriver {
 
     func link(to name: String, nameToLink: String) {
         
+        let descriptorIndex = getDescriptorId(with: name, for: rootDirectory.linksBlocks[0])
+        addFileMapping(fileName: nameToLink, descriptorIndex: descriptorIndex, blockNumber: rootDirectory.linksBlocks[0])
+        let descriptor = descriptors[descriptorIndex]
+        descriptor.referenceCount += 1
     }
     
     func unlink(name: String) {
         
+        let descriptorIndex = getDescriptorId(with: name, for: rootDirectory.linksBlocks[0])
+        let descriptor = descriptors[descriptorIndex]
+        let block = blocks[rootDirectory.linksBlocks[0]]
+        let result = block.deleteFileMapping(with: name)
+        descriptor.referenceCount -= 1
+        
+        if descriptor.referenceCount == 0 {
+            print("Removing descriptor")
+            let blockIds = getBlockIds(from: descriptor)
+            blockIds.forEach { id in
+                blocksBitMap.reset(position: id)
+            }
+            free(descriptor: descriptor)
+        }
     }
 }
 
@@ -349,6 +371,11 @@ extension FileSystemDriver {
     
     private func free(descriptor: Descriptor) {
         
+        descriptor.isUsed = false
+        descriptor.mode = .none
+        descriptor.referenceCount = 0
+        descriptor.size = 0
+        descriptor.linksBlocks = []
     }
     
     private func generateFD() -> Int {
@@ -360,13 +387,16 @@ extension FileSystemDriver {
         return numericOpenedFileDescriptor
     }
     
-
-    
     func getNumberOfAllocatedBlock(in descriptor: Descriptor) -> Int {
         
         descriptor.linksBlocks
             .filter { blocks[$0].mode == .link }
             .count
+    }
+    
+    func getBlockIds(from descriptor: Descriptor) -> [Int] {
+        
+        return descriptor.linksBlocks.filter { blocks[$0].mode == .link }
     }
 }
 

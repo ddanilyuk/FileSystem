@@ -26,10 +26,6 @@ FileSystemDriver.shared.createFile(
     with: "New file",
     in: FileSystemDriver.shared.rootDirectory
 )
-FileSystemDriver.shared.createFile(
-    with: "Last file",
-    in: FileSystemDriver.shared.rootDirectory
-)
 
 let ls = FileSystemDriver.shared.ls()
 Logger.shared.logLSCommand(ls)
@@ -44,7 +40,19 @@ print(FileSystemDriver.shared.readFile(from: openedFile2, size: 70) ?? "")
 
 Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
 
+Logger.shared.logBlocks()
 
+FileSystemDriver.shared.link(to: fileName1, nameToLink: "New link")
+
+Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
+print(FileSystemDriver.shared.readFile(from: openedFile1, size: nil) ?? "")
+
+FileSystemDriver.shared.unlink(name: "New link")
+FileSystemDriver.shared.unlink(name: fileName1)
+
+Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
+Logger.shared.logDescriptors()
+Logger.shared.logBlocks()
 
 extension Collection {
     

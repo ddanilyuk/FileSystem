@@ -33,4 +33,25 @@ final class Logger {
         }
         print("\n")
     }
+    
+    func logBlocks() {
+        print("\n$ Blocks:")
+        print(Array(repeating: "*", count: 72).joined())
+        let data = FileSystemDriver.shared.blocks
+            .enumerated()
+            .filter { !$1.blockSpace.isClear }
+            .map { "#\(String($0).padding(3)) \($1.description)" }
+            .joined(separator: "\n")
+        print(data)
+        print(Array(repeating: "*", count: 72).joined())
+        print("")
+    }
+    
+    func logDescriptors() {
+        
+        print("\n$ Descriptors:")
+        print(FileSystemDriver.shared.descriptors.map { $0.mode })
+        print("")
+    }
 }
+
