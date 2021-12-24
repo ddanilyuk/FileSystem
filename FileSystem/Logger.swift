@@ -27,7 +27,7 @@ final class Logger {
     
     func logLSCommand(_ description: [FileSystemDriver.LSDescription]) {
         
-        print("\n*** ls:")
+        print("$ ls:")
         description.forEach { description in
             print("File name: \(description.fileName.padding(Constants.fileNameSize)) | Mode: \(description.mode.description.padding(10)) | ref \(description.referenceCount) | index: \(description.descriptorIndex)")
         }

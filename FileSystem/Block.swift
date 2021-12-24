@@ -51,19 +51,15 @@ final class Block {
     }
     
     // MARK: - Properties
-    
-//    var blockNumber: Int
-    
+        
     var mode: Mode
     
     var blockSpace: ByteArray
     
     init(
-//        blockNumber: Int,
         mode: Block.Mode,
         blockSpace: ByteArray
     ) {
-//        self.blockNumber = blockNumber
         self.mode = mode
         self.blockSpace = blockSpace
     }
@@ -106,20 +102,31 @@ final class Block {
             guard !chunk.isClear else {
                 return nil
             }
-            
-            let chunkNameBytes = chunk[..<Constants.fileNameSize]
-            let chunkDescriptorIndexBytes = chunk[Constants.fileNameSize...]
-            
-            let trimmedCharacterSet = CharacterSet.whitespaces.union(CharacterSet.controlCharacters)
-            let fileName = chunkNameBytes.toString.trimmingCharacters(in: trimmedCharacterSet)
-            let descriptorIndex = chunkDescriptorIndexBytes.toInt
+                        
+            let fileName = chunk[..<Constants.fileNameSize].toFileName
+            let descriptorIndex = chunk[Constants.fileNameSize...].toInt
             return (fileName: fileName, descriptorIndex: descriptorIndex)
         }
     }
     
     func getDescriptorIndex(with name: String) -> Int {
         
-        return 0
+        let index = mappingChunks()
+            .first { chunk in
+                guard !chunk.isClear else {
+                    return false
+                }
+                let fileName = chunk[..<Constants.fileNameSize].toFileName
+                return fileName == name
+            }
+            .map {
+                $0[Constants.fileNameSize...].toInt
+            }
+        
+        guard let index = index else {
+            fatalError("Can't find descriptor with this name")
+        }
+        return index
     }
     
     // MARK: Delete methods
@@ -131,17 +138,17 @@ final class Block {
     
     // MARK: - Private methods
     
-    private func setData(data: ByteArray, offset: Int) {
+    func setData(data: ByteArray, offset: Int) {
         
         guard
-            data.count + offset < Constants.blockSize
+            data.count + offset <= Constants.blockSize
         else {
             fatalError("Out of space")
         }
         blockSpace.replaceSubrange(offset..<offset + data.count, with: data)
     }
     
-    private func mappingChunks() -> [ByteArray] {
+    func mappingChunks() -> [ByteArray] {
         
         let mappingSize = Constants.mappingSize
         let availableNumberOfMappings = blockSpace.count / mappingSize

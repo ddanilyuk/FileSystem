@@ -36,6 +36,12 @@ extension RandomAccessCollection where Element == Byte {
             fatalError("Cant represent string")
         }
     }
+    
+    var toFileName: String {
+        
+        let trimmedCharacterSet = CharacterSet.whitespaces.union(CharacterSet.controlCharacters)
+        return self.toString.trimmingCharacters(in: trimmedCharacterSet)
+    }
 }
 
 
@@ -49,5 +55,10 @@ extension Int {
     }
 }
 
-
-//let some = Array<Byte>
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
+}

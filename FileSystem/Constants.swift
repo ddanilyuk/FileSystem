@@ -29,4 +29,9 @@ struct Constants {
     static var mappingSize: Int {
         fileNameSize + intSize
     }
+    
+    // Size for lined block
+    static var linkedBlockSize: Int {
+        return blockSize - intSize
+    }
 }
