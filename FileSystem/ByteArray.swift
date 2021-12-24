@@ -42,6 +42,12 @@ extension MutableCollection where Element == Byte {
     }
 }
 
+extension Array where Element == Byte {
+    
+    init(size: Int) {
+        self = ByteArray(repeating: 0, count: size)
+    }
+}
 
 extension Int {
     

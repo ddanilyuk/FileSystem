@@ -109,17 +109,19 @@ extension FileSystemDriver {
         }
     }
     
-    func ls() -> [LSDescription] {
-        return blocks[rootDirectory.linksBlocks[0]].getFilesMappings().map { fileName, descriptorIndex in
-            let descriptor = descriptors[descriptorIndex]
-            return LSDescription(
-                fileName: fileName,
-                mode: descriptor.mode,
-                referenceCount: descriptor.referenceCount,
-                descriptorIndex: descriptorIndex,
-                size: descriptor.size
-            )
-        }
+    func ls() -> [LSCommand.LineModel] {
+        rootBlock
+            .getFilesMappings()
+            .map { fileName, descriptorIndex in
+                let descriptor = descriptors[descriptorIndex]
+                return LSCommand.LineModel(
+                    fileName: fileName,
+                    mode: descriptor.mode,
+                    referenceCount: descriptor.referenceCount,
+                    descriptorIndex: descriptorIndex,
+                    size: descriptor.size
+                )
+            }
     }
 }
 
@@ -141,7 +143,7 @@ extension FileSystemDriver {
     @discardableResult
     func openFile(with name: String) -> Int {
         
-        let numericOpenedFileDescriptor = generateFD()
+        let numericOpenedFileDescriptor = openedFiles.uniqueKey
         openedFiles[numericOpenedFileDescriptor] = getDescriptor(with: name).descriptorIndex
         return numericOpenedFileDescriptor
     }
@@ -306,8 +308,14 @@ extension FileSystemDriver {
             deletedBlocks.forEach { blocksBitMap.reset(position: $0) }
             if let lastBlockId = descriptor.linksBlocks.last {
                 let block = blocks[lastBlockId]
-                block.setData(data: ByteArray(repeating: 0, count: Constants.linkedBlockSize - blockTruncateOffset), offset: blockTruncateOffset)
-                block.setData(data: [0, 0], offset: Constants.linkedBlockSize)
+                block.setData(
+                    data: ByteArray(size: Constants.linkedBlockSize - blockTruncateOffset),
+                    offset: blockTruncateOffset
+                )
+                block.setData(
+                    data: ByteArray(size: Constants.intSize),
+                    offset: Constants.linkedBlockSize
+                )
             }
             descriptor.updateSize()
 
@@ -368,30 +376,7 @@ extension FileSystemDriver {
                                               descriptor: Descriptor) {
         
         let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
-        
         return (descriptorIndex: descriptorIndex,
                 descriptor: descriptors[descriptorIndex])
-    }
-    
-    private func generateFD() -> Int {
-        
-        var numericOpenedFileDescriptor: Int
-        repeat {
-            numericOpenedFileDescriptor = Int.random(in: 0..<Int(UInt16.max))
-        } while openedFiles.keys.contains(numericOpenedFileDescriptor)
-        return numericOpenedFileDescriptor
-    }
-}
-
-// MARK: - LSDescription
-
-extension FileSystemDriver {
-    
-    struct LSDescription {
-        var fileName: String
-        var mode: Descriptor.Mode
-        var referenceCount: Int
-        var descriptorIndex: Int
-        var size: Int
     }
 }

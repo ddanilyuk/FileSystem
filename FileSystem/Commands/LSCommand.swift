@@ -9,6 +9,14 @@ import Foundation
 
 struct LSCommand: Command {
     
+    struct LineModel {
+        var fileName: String
+        var mode: Descriptor.Mode
+        var referenceCount: Int
+        var descriptorIndex: Int
+        var size: Int
+    }
+    
     static func execute(_ inputs: Void = ()) {
         
         print("\n~$ ls")
@@ -20,12 +28,12 @@ struct LSCommand: Command {
         print("\(fileName) \(descriptorMode) \(referenceCount) \(descriptorIndex) \(descriptorSize)")
         
         let data = FileSystemDriver.shared.ls()
-            .map { description in
-                let fileName = description.fileName.padding(Constants.fileNameSize)
-                let descriptorMode = description.mode.description.padding(10)
-                let referenceCount = description.referenceCount.toString.padding(12)
-                let descriptorIndex = description.descriptorIndex.toString.padding(7)
-                let descriptorSize = description.size.toString.padding(6)
+            .map { line in
+                let fileName = line.fileName.padding(Constants.fileNameSize)
+                let descriptorMode = line.mode.description.padding(10)
+                let referenceCount = line.referenceCount.toString.padding(12)
+                let descriptorIndex = line.descriptorIndex.toString.padding(7)
+                let descriptorSize = line.size.toString.padding(6)
                 return "\(fileName) \(descriptorMode) \(referenceCount) \(descriptorIndex) \(descriptorSize)"
             }
             .joined(separator: "\n")

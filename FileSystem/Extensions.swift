@@ -7,6 +7,17 @@
 
 import Foundation
 
+extension Dictionary where Key == Int {
+    
+    var uniqueKey: Int {
+        var numericOpenedFileDescriptor: Int
+        repeat {
+            numericOpenedFileDescriptor = Int.random(in: 0..<Int(UInt16.max))
+        } while keys.contains(numericOpenedFileDescriptor)
+        return numericOpenedFileDescriptor
+    }
+}
+
 extension Collection {
     
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
