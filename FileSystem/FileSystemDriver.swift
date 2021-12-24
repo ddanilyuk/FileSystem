@@ -131,7 +131,7 @@ extension FileSystemDriver {
 
     func createFile(with name: String, in directory: Descriptor) {
         let (descriptorIndex, descriptor) = getEmptyDescriptor()
-        Logger.shared.log("Find free descriptor with id: \(descriptorIndex)")
+        print("Find free descriptor with id: \(descriptorIndex)")
         initiateFileIn(descriptor: descriptor)
         addFileMapping(
             fileName: name,
@@ -141,6 +141,7 @@ extension FileSystemDriver {
         descriptor.referenceCount = 1
     }
     
+    @discardableResult
     func openFile(with name: String) -> Int {
         
         let descriptorIndex = getDescriptorId(with: name, for: rootDirectory.linksBlocks[0])

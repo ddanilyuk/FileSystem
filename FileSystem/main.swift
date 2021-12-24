@@ -10,6 +10,41 @@ import Foundation
 
 //MountCommand().execute(inputs: MountCommand.Input(name: "Hi every "))
 
+
+
+
+MountCommand.execute()
+MKFSCommand.execute(10)
+let fileName = "Test.txt"
+CreateCommand.execute(fileName)
+
+LSCommand.execute()
+
+
+let openedFileIndex = OpenCommand.execute(fileName)
+let data = "Heh its new data bitch."
+let writeParameters = WriteCommand.InputType(
+    numericOpenedFileDescriptor: openedFileIndex,
+    offset: 0,
+    data: data
+)
+WriteCommand.execute(writeParameters)
+
+let readParameters = ReadCommand.InputType(
+    numericOpenedFileDescriptor: openedFileIndex,
+    offset: 0,
+    size: data.count
+)
+ReadCommand.execute(readParameters)
+
+LSCommand.execute()
+
+DebugCommand.execute()
+
+
+//let openedFile
+
+/*
 FileSystemDriver.shared.mountFromMemory()
 FileSystemDriver.shared.generateDescriptors(10)
 let fileName1 = "Test file"
@@ -27,8 +62,7 @@ FileSystemDriver.shared.createFile(
     in: FileSystemDriver.shared.rootDirectory
 )
 
-let ls = FileSystemDriver.shared.ls()
-Logger.shared.logLSCommand(ls)
+LSCommand().execute()
 
 let openedFile1 = FileSystemDriver.shared.openFile(with: fileName1)
 FileSystemDriver.shared.writeFile(to: openedFile1, offset: 0, data: "11111111112222222222111111111122222222221111111111222222222212345678")
@@ -38,7 +72,7 @@ let openedFile2 = FileSystemDriver.shared.openFile(with: fileName2)
 FileSystemDriver.shared.writeFile(to: openedFile2, offset: 0, data: "1111111111222222222211111111112222222222111111111122222222229999999999888")
 print(FileSystemDriver.shared.readFile(from: openedFile2, size: 70) ?? "")
 
-Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
+LSCommand().execute()
 
 Logger.shared.debug()
 
@@ -53,14 +87,11 @@ FileSystemDriver.shared.unlink(name: fileName1)
 Logger.shared.logLSCommand(FileSystemDriver.shared.ls())
 Logger.shared.debug()
 
-
-// truncateFile
-
-print("---")
 FileSystemDriver.shared.truncateFile(with: fileName2, size: 100)
 print(FileSystemDriver.shared.readFile(from: openedFile2, size: nil) ?? "")
 Logger.shared.debug()
 
+ */
 
 extension Collection {
     
@@ -75,5 +106,11 @@ extension String {
     
     func padding(_ length: Int) -> String {
         return padding(toLength: length, withPad: " ", startingAt: 0)
+    }
+}
+
+extension Int {
+    var toString: String {
+        String(self)
     }
 }
