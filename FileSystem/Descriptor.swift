@@ -53,6 +53,19 @@ final class Descriptor {
         self.linksBlocks = linksBlocks
     }
     
+    func updateSize() {
+        size = linksBlocks.count * Constants.linkedBlockSize
+    }
+    
+    func initiateAsFile() {
+        
+        isUsed = true
+        mode = .file
+        referenceCount = 0
+        size = 0
+        linksBlocks = []
+    }
+    
     func free() {
         
         isUsed = false

@@ -34,4 +34,13 @@ public struct BitMap {
     mutating func reset(position: Int) {
         bits[position] = false
     }
+    
+    mutating func firstEmpty() -> Int {
+        if let emptySlot = bits.enumerated().first(where: { $1 == false }) {
+            set(position: emptySlot.offset)
+            return emptySlot.offset
+        } else {
+            fatalError("Unable to find empty slot")
+        }
+    }
 }

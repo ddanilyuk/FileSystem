@@ -14,8 +14,7 @@ struct CreateCommand: Command {
     static func execute(_ name: String) {
         
         print("\n~$ touch \(name)")
-        let rootDirectory = FileSystemDriver.shared.rootDirectory
-        FileSystemDriver.shared.createFile(with: name, in: rootDirectory)
+        FileSystemDriver.shared.createFile(with: name)
         print("File successfully created")
     }
 }
