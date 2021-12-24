@@ -52,4 +52,13 @@ final class Descriptor {
         self.size = size
         self.linksBlocks = linksBlocks
     }
+    
+    func free() {
+        
+        isUsed = false
+        mode = .none
+        referenceCount = 0
+        size = 0
+        linksBlocks = []
+    }
 }

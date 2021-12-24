@@ -184,14 +184,13 @@ extension FileSystemDriver {
         if totalSize > descriptor.size {
             print("Not enough space. Allocating new blocs")
             let delta = totalSize - descriptor.size
-            let neededBlocksCount = Int(ceil(CGFloat(delta) / CGFloat(Constants.linkedBlockSize)))
+            let neededBlocksCount = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.linkedBlockSize))
             for _ in 0..<neededBlocksCount {
                 appendBlock(to: descriptor, blockNumber: getEmptyBlockId())
             }
         }
         
         // Get list of blocks that will be written
-        let firstBlockOffset = offset % Constants.linkedBlockSize
         let startBlockIndex = offset / Constants.linkedBlockSize
         let allBlocksIndex = Int(ceil(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize)))
         
@@ -199,8 +198,8 @@ extension FileSystemDriver {
         
         // Divide data into a chunks
         var chunks: [ByteArray] = []
-        var startIndex = firstBlockOffset
-        var endIndex = min(Constants.linkedBlockSize - firstBlockOffset, dataBytes.count)
+        var startIndex = 0
+        var endIndex = min(dataBytes.count, Constants.linkedBlockSize)
         repeat {
             chunks.append(Array(dataBytes[startIndex..<endIndex]))
             startIndex = endIndex
@@ -352,7 +351,7 @@ extension FileSystemDriver {
             blockIds.forEach { id in
                 blocksBitMap.reset(position: id)
             }
-            free(descriptor: descriptor)
+            descriptor.free()
         }
     }
 }
@@ -406,15 +405,6 @@ extension FileSystemDriver {
         
         let block = blocks[blockNumber]
         block.createFileMapping(fileName: fileName, descriptorIndex: descriptorIndex)
-    }
-    
-    private func free(descriptor: Descriptor) {
-        
-        descriptor.isUsed = false
-        descriptor.mode = .none
-        descriptor.referenceCount = 0
-        descriptor.size = 0
-        descriptor.linksBlocks = []
     }
     
     private func generateFD() -> Int {

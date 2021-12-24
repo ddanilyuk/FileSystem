@@ -12,4 +12,7 @@ import Foundation
 
 //Tests.testCreate4Files()
 
-Tests.testBigFile()
+//Tests.testBigFile()
+
+Tests.testOffset()
+

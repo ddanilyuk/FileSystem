@@ -113,4 +113,56 @@ struct Tests {
         // Umount
         UMountCommand.execute()
     }
+    
+    static func testOffset() {
+        
+        let fileName1 = "Big.file"
+        let data1 = "Lorem ipsum dolor"
+        let data2 = "test text"
+
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create
+        CreateCommand.execute(fileName1)
+        
+        // Check
+        LSCommand.execute()
+        
+        // Open
+        let openedFileIndex = OpenCommand.execute(fileName1)
+        
+        // Write
+        WriteCommand.execute(
+            WriteCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                data: data1
+            )
+        )
+        
+        WriteCommand.execute(
+            WriteCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 6,
+                data: data2
+            )
+        )
+        
+        // Read
+        ReadCommand.execute(
+            ReadCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                size: nil
+            )
+        )
+        
+        // Check blocks
+        DebugCommand.execute()
+        
+        // Umount
+        UMountCommand.execute()
+    }
 }

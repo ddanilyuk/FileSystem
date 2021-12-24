@@ -27,3 +27,10 @@ extension Int {
         String(self)
     }
 }
+
+extension CGFloat {
+    
+    static func roundUp(_ number: Self) -> Int {
+        return Int(ceil(number))
+    }
+}
