@@ -54,7 +54,7 @@ final class FileSystemDriver {
         descriptor.isUsed = true
         descriptor.mode = .directory
         descriptor.referenceCount = 1
-        blocks[emptyBlockId].mode = .mappingsAndData
+        blocks[emptyBlockId].mode = .mappings
         descriptor.linksBlocks = [emptyBlockId]
         descriptor.size = 0
     }
@@ -161,7 +161,9 @@ extension FileSystemDriver {
         offset: Int,
         data: String
     ) {
-        guard let descriptorIndex = openedFiles[numericOpenedFileDescriptor] else {
+        guard
+            let descriptorIndex = openedFiles[numericOpenedFileDescriptor]
+        else {
             fatalError("File was not opened")
         }
         let descriptor = descriptors[descriptorIndex]
@@ -174,43 +176,31 @@ extension FileSystemDriver {
         offset: Int,
         data: String
     ) {
-        guard descriptor.mode == .file else {
+        guard
+            descriptor.mode == .file
+        else {
             fatalError("Unable to write not for file")
         }
-        let dataBytes: ByteArray = Array(data.utf8)
         let totalSize = offset + data.count
         
         // Allocate enough blocks for write if needed
         if totalSize > descriptor.size {
-            print("Not enough space. Allocating new blocs")
             let delta = totalSize - descriptor.size
             let neededBlocksCount = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.linkedBlockSize))
-            for _ in 0..<neededBlocksCount {
-                appendBlock(to: descriptor, blockNumber: getEmptyBlockId())
-            }
+            (0..<neededBlocksCount).forEach { _ in appendBlock(to: descriptor, blockNumber: getEmptyBlockId()) }
         }
         
-        // Get list of blocks that will be written
-        let startBlockIndex = offset / Constants.linkedBlockSize
-        let allBlocksIndex = Int(ceil(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize)))
+        var blocksToWrite = getBlocks(
+            from: descriptor,
+            with: offset,
+            totalSize: totalSize
+        )
         
-        var blocksToWrite = (startBlockIndex..<allBlocksIndex).map { descriptor.linksBlocks[$0] }.map { blocks[$0] }
+        var dataChunks = Array(data.utf8).chunked(into: Constants.linkedBlockSize)
         
-        // Divide data into a chunks
-        var chunks: [ByteArray] = []
-        var startIndex = 0
-        var endIndex = min(dataBytes.count, Constants.linkedBlockSize)
-        repeat {
-            chunks.append(Array(dataBytes[startIndex..<endIndex]))
-            startIndex = endIndex
-            endIndex += min(dataBytes.count - startIndex, Constants.linkedBlockSize)
-        } while startIndex < data.count
-        
-        blocksToWrite.removeFirst().setData(data: chunks.removeFirst(), offset: offset)
-        
-        for (block, chunk) in zip(blocksToWrite, chunks) {
-            block.setData(data: chunk, offset: 0)
-        }
+        // Set data
+        blocksToWrite.removeFirst().setData(data: dataChunks.removeFirst(), offset: offset)
+        zip(blocksToWrite, dataChunks).forEach { $0.setData(data: $1, offset: 0) }
     }
     
     private func appendBlock(
@@ -221,11 +211,14 @@ extension FileSystemDriver {
         if let lastBlockId = descriptor.linksBlocks.last {
             let lastBlock = blocks[lastBlockId]
             let blockNumberBytes = blockNumber.bytes
-            lastBlock.mode = .link
-            lastBlock.blockSpace.replaceSubrange((Constants.linkedBlockSize..<Constants.blockSize), with: blockNumberBytes)
+            lastBlock.mode = .dataAndLink
+            lastBlock.blockSpace.replaceSubrange(
+                (Constants.linkedBlockSize..<Constants.blockSize),
+                with: blockNumberBytes
+            )
         }
         
-        blocks[blockNumber].mode = .link
+        blocks[blockNumber].mode = .dataAndLink
         descriptor.linksBlocks.append(blockNumber)
     }
 }
@@ -240,7 +233,9 @@ extension FileSystemDriver {
         size: Int?
     ) -> String? {
         
-        guard let descriptorIndex = openedFiles[numericOpenedFileDescriptor] else {
+        guard
+            let descriptorIndex = openedFiles[numericOpenedFileDescriptor]
+        else {
             fatalError("File was not opened")
         }
         
@@ -255,24 +250,31 @@ extension FileSystemDriver {
         return readFrom(descriptor, offset: offset, size: size).toString
     }
     
-    private func readFrom(_ descriptor: Descriptor, offset: Int, size: Int) -> ByteArray {
+    private func readFrom(
+        _ descriptor: Descriptor,
+        offset: Int,
+        size: Int
+    ) -> ByteArray {
         
-        let firstBlockOffset = offset % Constants.linkedBlockSize
-        let startBlockIndex = offset / Constants.linkedBlockSize
-        let endBlockIndex = startBlockIndex + Int(ceil(CGFloat(size) / CGFloat(Constants.linkedBlockSize)))
-        let lastBlockOffset = Constants.linkedBlockSize - ((endBlockIndex - startBlockIndex) * Constants.linkedBlockSize - size - firstBlockOffset)
-        let blocksToRead = (startBlockIndex..<endBlockIndex).map { descriptor.linksBlocks[$0] }.map { blocks[$0] }
-        
-        var startIndex = firstBlockOffset
-        var endIndex = offset + size < Constants.linkedBlockSize ? offset + size : Constants.linkedBlockSize
-        
-        let dataChunks: [ByteArray] = blocksToRead.enumerated().map { index, block in
-            let data = Array(block.blockSpace[startIndex..<endIndex])
-            startIndex = 0
-            endIndex = index == blocksToRead.count - 2 ? lastBlockOffset : Constants.linkedBlockSize
-            return data
-        }
-        return Array(dataChunks.joined())
+        let blocksToRead = getBlocks(
+            from: descriptor,
+            with: offset,
+            totalSize: offset + size
+        )
+        let blocksSpaces = blocksToRead
+            .map { $0.blockSpace[..<Constants.linkedBlockSize] }
+            .joined()
+        return Array(Array(blocksSpaces)[offset..<offset + size])
+    }
+    
+    private func getBlocks(
+        from descriptor: Descriptor,
+        with offset: Int,
+        totalSize: Int
+    ) -> [Block] {
+        let firstBlockIndex = offset / Constants.linkedBlockSize
+        let lastBlockIndex = CGFloat.roundUp(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize))
+        return (firstBlockIndex..<lastBlockIndex).map { blocks[descriptor.linksBlocks[$0]] }
     }
     
     func truncateFile(with name: String, size: Int) {
@@ -300,28 +302,14 @@ extension FileSystemDriver {
             deletedBlocks.forEach { blocksBitMap.reset(position: $0) }
             if let lastBlockId = descriptor.linksBlocks.last {
                 let block = blocks[lastBlockId]
-//                block.linkChunk()
                 block.setData(data: ByteArray(repeating: 0, count: Constants.linkedBlockSize - blockTruncateOffset), offset: blockTruncateOffset)
                 block.setData(data: [0, 0], offset: Constants.linkedBlockSize)
-//                block.setData(data: ByteArray, offset: blockTruncateOffset)
             }
             descriptor.size = getNumberOfAllocatedBlock(in: descriptor) * Constants.linkedBlockSize
             
         } else {
             print("Size was not changed")
         }
-    }
-}
-
-extension Array {
-    
-    mutating func removeLast(_ numberOfElementsToRemove: Int) -> [Element] {
-        
-//        var array: [Element] = []
-//        (0..<numberOfElementsToRemove).forEach { _ in array.append(removeLast()) }
-//        return array
-        
-        return (0..<numberOfElementsToRemove).map { _ in removeLast() }
     }
 }
 
@@ -343,6 +331,7 @@ extension FileSystemDriver {
         let descriptor = descriptors[descriptorIndex]
         let block = blocks[rootDirectory.linksBlocks[0]]
         let result = block.deleteFileMapping(with: name)
+        print(result)
         descriptor.referenceCount -= 1
         
         if descriptor.referenceCount == 0 {
@@ -419,13 +408,13 @@ extension FileSystemDriver {
     func getNumberOfAllocatedBlock(in descriptor: Descriptor) -> Int {
         
         descriptor.linksBlocks
-            .filter { blocks[$0].mode == .link }
+            .filter { blocks[$0].mode == .dataAndLink }
             .count
     }
     
     func getBlockIds(from descriptor: Descriptor) -> [Int] {
         
-        return descriptor.linksBlocks.filter { blocks[$0].mode == .link }
+        return descriptor.linksBlocks.filter { blocks[$0].mode == .dataAndLink }
     }
 }
 

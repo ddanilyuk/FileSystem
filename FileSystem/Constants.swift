@@ -9,10 +9,10 @@ import Foundation
 
 struct Constants {
     
-    // Number of blocks in `?file?`
+    // Number of blocks in file system
     static let numberOfBlocks = 20
     
-    // Number of blocks in `?FS?`
+    // Number of descriptors in file system
     static let numberOfDescriptors = 100
     
     // Size in bytes
@@ -24,13 +24,13 @@ struct Constants {
     // All integers stored in FS are truncated to that size in bytes
     static let intSize = 2
     
-    // dividing a bytes in block into a chunks of MAPPING_SIZE bytes, this chunks will store
+    // Dividing a bytes in block into a chunks of MAPPING_SIZE bytes, this chunks will store
     // filename: descriptor_id mappings
     static var mappingSize: Int {
         fileNameSize + intSize
     }
     
-    // Size for lined block
+    // Size for data in linked block
     static var linkedBlockSize: Int {
         return blockSize - intSize
     }

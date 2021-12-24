@@ -15,6 +15,25 @@ extension Collection {
     }
 }
 
+extension Array {
+    
+    mutating func removeLast(_ numberOfElementsToRemove: Int) -> [Element] {
+        
+        return (0..<numberOfElementsToRemove).map { _ in removeLast() }
+    }
+    
+    func chunked(
+        into size: Int,
+        from position: Int = 0,
+        to element: Int? = nil
+    ) -> [[Element]] {
+        let element = element == nil ? count : element!
+        return stride(from: position, to: element, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
+}
+
 extension String {
     
     func padding(_ length: Int) -> String {
@@ -32,5 +51,29 @@ extension CGFloat {
     
     static func roundUp(_ number: Self) -> Int {
         return Int(ceil(number))
+    }
+}
+
+extension String {
+    
+    struct TrimOptionSet: OptionSet {
+        
+        let rawValue: Int
+        
+        static let whitespaces = TrimOptionSet(rawValue: 1 << 0)
+        static let controlCharacters = TrimOptionSet(rawValue: 1 << 1)
+    }
+    
+    func trim(_ optionSet: TrimOptionSet) -> String {
+        
+        var characterSet = CharacterSet()
+        
+        if optionSet.contains(.whitespaces) {
+            characterSet = characterSet.union(.whitespaces)
+        }
+        if optionSet.contains(.controlCharacters) {
+            characterSet = characterSet.union(.controlCharacters)
+        }
+        return trimmingCharacters(in: characterSet)
     }
 }

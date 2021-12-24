@@ -10,7 +10,7 @@ import Foundation
 typealias Byte = UInt8
 typealias ByteArray = [Byte]
 
-extension RandomAccessCollection where Element == Byte {
+extension MutableCollection where Element == Byte {
     
     var isClear: Bool {
         !contains { $0 != 0 }
@@ -38,9 +38,7 @@ extension RandomAccessCollection where Element == Byte {
     }
     
     var toFileName: String {
-        
-        let trimmedCharacterSet = CharacterSet.whitespaces.union(CharacterSet.controlCharacters)
-        return self.toString.trimmingCharacters(in: trimmedCharacterSet)
+        toString.trim([.controlCharacters, .whitespaces])
     }
 }
 
@@ -52,13 +50,5 @@ extension Int {
             assertionFailure("Can't represent this value")
         }
         return [UInt8(self >> 8 & 0xff), UInt8(self & 0xff)]
-    }
-}
-
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
     }
 }
