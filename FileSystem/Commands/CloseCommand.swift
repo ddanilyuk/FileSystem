@@ -8,13 +8,10 @@
 import Foundation
 
 struct CloseCommand: Command {
-    
-    typealias InputType = Int
-    
-    static func execute(_ inputs: Int) {
         
-        print("\n~$ close \(inputs)")
-        FileSystemDriver.shared.closeFile(with: inputs)
-        print("File with id: \(inputs) closed")
+    static func execute(_ numericOpenedFileDescriptor: Int) {
+        print("\n~$ close \(numericOpenedFileDescriptor)")
+        FileSystemDriver.shared.closeFile(with: numericOpenedFileDescriptor)
+        print("File with id: \(numericOpenedFileDescriptor) closed")
     }
 }

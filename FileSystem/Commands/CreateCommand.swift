@@ -8,11 +8,8 @@
 import Foundation
 
 struct CreateCommand: Command {
-    
-    typealias InputType = String
-    
-    static func execute(_ name: String) {
         
+    static func execute(_ name: String) {
         print("\n~$ touch \(name)")
         FileSystemDriver.shared.createFile(with: name)
         print("File successfully created")

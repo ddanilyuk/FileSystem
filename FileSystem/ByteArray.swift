@@ -29,7 +29,6 @@ extension MutableCollection where Element == Byte {
     }
     
     var toString: String {
-        
         if let string = String(bytes: self, encoding: .utf8) {
             return string
         } else {

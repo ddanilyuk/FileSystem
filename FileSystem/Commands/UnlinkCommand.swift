@@ -8,11 +8,8 @@
 import Foundation
 
 struct UnlinkCommand: Command {
-    
-    typealias InputType = String
-    
-    static func execute(_ name: InputType) {
         
+    static func execute(_ name: String) {
         print("\n~$ unlink \(name)")
         FileSystemDriver.shared.unlink(name: name)
         print("File with name \(name) unlinked")

@@ -15,7 +15,6 @@ struct TruncateCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        
         print("\n~$ truncate \(inputs.name) \(inputs.size)")
         FileSystemDriver.shared.truncateFile(
             with: inputs.name,

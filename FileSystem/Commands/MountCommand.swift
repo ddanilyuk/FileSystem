@@ -10,7 +10,6 @@ import Foundation
 struct MountCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
-        
         print("\n~$ mount")
         FileSystemDriver.shared.mountFromMemory()
         print("Successfully mounted")

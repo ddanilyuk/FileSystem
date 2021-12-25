@@ -53,6 +53,8 @@ final class Descriptor {
         self.linksBlocks = linksBlocks
     }
     
+    // MARK: - Public methods
+    
     func updateSize() {
         size = linksBlocks.count * Constants.linkedBlockSize
     }

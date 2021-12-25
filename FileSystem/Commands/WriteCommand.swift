@@ -16,7 +16,6 @@ struct WriteCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        
         print("\n~$ write \(inputs.numericOpenedFileDescriptor)")
         FileSystemDriver.shared.writeFile(
             to: inputs.numericOpenedFileDescriptor,

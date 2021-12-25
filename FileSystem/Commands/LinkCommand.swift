@@ -15,7 +15,6 @@ struct LinkCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        
         print("\n~$ link \(inputs.name) \(inputs.nameFileToLink)")
         FileSystemDriver.shared.link(
             to: inputs.name,

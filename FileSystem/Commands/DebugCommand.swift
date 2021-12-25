@@ -32,7 +32,6 @@ struct DebugCommand: Command {
                 return "\(number) \(isUsed) \(dataDescription)" }
             .joined(separator: "\n")
         print(data)
-        print("")
     }
     
     static func debugDescriptors() {

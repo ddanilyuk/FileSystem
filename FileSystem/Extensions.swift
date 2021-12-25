@@ -29,8 +29,7 @@ extension Collection {
 extension Array {
     
     mutating func removeLast(_ numberOfElementsToRemove: Int) -> [Element] {
-        
-        return (0..<numberOfElementsToRemove).map { _ in removeLast() }
+        (0..<numberOfElementsToRemove).map { _ in removeLast() }
     }
     
     func chunked(
@@ -53,6 +52,7 @@ extension String {
 }
 
 extension Int {
+    
     var toString: String {
         String(self)
     }

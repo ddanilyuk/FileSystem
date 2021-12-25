@@ -8,13 +8,10 @@
 import Foundation
 
 struct OpenCommand: Command {
-    
-    typealias InputType = String
-    
-    static func execute(_ inputs: String) -> Int {
         
+    static func execute(_ name: String) -> Int {
         print("\n~$ open")
-        let result = FileSystemDriver.shared.openFile(with: inputs)
+        let result = FileSystemDriver.shared.openFile(with: name)
         print("File opened with id: \(result)")
         return result
     }

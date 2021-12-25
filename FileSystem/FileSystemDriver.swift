@@ -17,7 +17,7 @@ final class FileSystemDriver {
     
     var descriptors: [Descriptor] = []
     
-    /// `[numericOpenedFileDescriptor : fileDescriptorId]`
+    /// `[numericOpenedFileDescriptor : fileDescriptorIndex]`
     /// Call this number "numeric file descriptor". To work with an open file (this number is not the same as the descriptor number that identifies the file in the FS.
     var openedFiles: [Int: Int] = [:]
     
@@ -56,10 +56,10 @@ final class FileSystemDriver {
         
         let descriptor = descriptors[0]
         let emptyBlockId = blocksBitMap.firstEmpty()
+        blocks[emptyBlockId].mode = .mappings
         descriptor.isUsed = true
         descriptor.mode = .directory
         descriptor.referenceCount = 1
-        blocks[emptyBlockId].mode = .mappings
         descriptor.linksBlocks = [emptyBlockId]
         descriptor.size = 0
     }
@@ -96,6 +96,7 @@ extension FileSystemDriver {
     
     func umount() {
         
+        openedFiles = [:]
         descriptors = []
         blocksBitMap = nil
         blocks = nil
@@ -142,7 +143,6 @@ extension FileSystemDriver {
     
     @discardableResult
     func openFile(with name: String) -> Int {
-        
         let numericOpenedFileDescriptor = openedFiles.uniqueKey
         openedFiles[numericOpenedFileDescriptor] = getDescriptor(with: name).descriptorIndex
         return numericOpenedFileDescriptor
@@ -208,25 +208,6 @@ extension FileSystemDriver {
         blocksToWrite.removeFirst().setData(data: dataChunks.removeFirst(), offset: offset)
         zip(blocksToWrite, dataChunks).forEach { $0.setData(data: $1, offset: 0) }
     }
-    
-    private func appendBlock(
-        to descriptor: Descriptor,
-        blockNumber: Int
-    ) {
-        
-        if let lastBlockId = descriptor.linksBlocks.last {
-            let lastBlock = blocks[lastBlockId]
-            let blockNumberBytes = blockNumber.bytes
-            lastBlock.mode = .dataAndLink
-            lastBlock.blockSpace.replaceSubrange(
-                (Constants.linkedBlockSize..<Constants.blockSize),
-                with: blockNumberBytes
-            )
-        }
-        
-        blocks[blockNumber].mode = .dataAndLink
-        descriptor.linksBlocks.append(blockNumber)
-    }
 }
 
 // MARK: - Read
@@ -247,7 +228,7 @@ extension FileSystemDriver {
         
         let descriptor = descriptors[descriptorIndex]
         
-        // Read full if nil
+        // Read all if nil
         let size = size ?? descriptor.size
         
         guard
@@ -274,16 +255,6 @@ extension FileSystemDriver {
             .map { $0.blockSpace[..<Constants.linkedBlockSize] }
             .joined()
         return Array(Array(blocksSpaces)[offset..<offset + size])
-    }
-    
-    private func getBlocks(
-        from descriptor: Descriptor,
-        with offset: Int,
-        totalSize: Int
-    ) -> [Block] {
-        let firstBlockIndex = offset / Constants.linkedBlockSize
-        let lastBlockIndex = CGFloat.roundUp(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize))
-        return (firstBlockIndex..<lastBlockIndex).map { blocks[descriptor.linksBlocks[$0]] }
     }
 }
 
@@ -374,11 +345,40 @@ extension FileSystemDriver {
         }
     }
     
-    func getDescriptor(with name: String) -> (descriptorIndex: Int,
+    private func getDescriptor(with name: String) -> (descriptorIndex: Int,
                                               descriptor: Descriptor) {
         
         let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
         return (descriptorIndex: descriptorIndex,
                 descriptor: descriptors[descriptorIndex])
+    }
+    
+    private func getBlocks(
+        from descriptor: Descriptor,
+        with offset: Int,
+        totalSize: Int
+    ) -> [Block] {
+        let firstBlockIndex = offset / Constants.linkedBlockSize
+        let lastBlockIndex = CGFloat.roundUp(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize))
+        return (firstBlockIndex..<lastBlockIndex).map { blocks[descriptor.linksBlocks[$0]] }
+    }
+    
+    private func appendBlock(
+        to descriptor: Descriptor,
+        blockNumber: Int
+    ) {
+        
+        if let lastBlockId = descriptor.linksBlocks.last {
+            let lastBlock = blocks[lastBlockId]
+            let blockNumberBytes = blockNumber.bytes
+            lastBlock.mode = .dataAndLink
+            lastBlock.blockSpace.replaceSubrange(
+                (Constants.linkedBlockSize..<Constants.blockSize),
+                with: blockNumberBytes
+            )
+        }
+        
+        blocks[blockNumber].mode = .dataAndLink
+        descriptor.linksBlocks.append(blockNumber)
     }
 }
