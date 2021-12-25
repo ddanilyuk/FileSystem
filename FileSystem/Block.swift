@@ -29,51 +29,24 @@ final class Block {
     // MARK: - Computed properties
     
     var mappingsChunks: [ByteArray] {
-        
-        guard
-            mode == .mappings
-        else {
-            fatalError("Unable to get mapping chunks with mode != .mappingg")
-        }
-        
-        let mappingSize = Constants.mappingSize
-        let availableNumberOfMappings = blockSpace.count / mappingSize
-        
-        return (0..<availableNumberOfMappings).map { index in
-            let startIndex = index * mappingSize
-            let endIndex = index * mappingSize + mappingSize
+        (0..<(blockSpace.count / Constants.Common.mappingSize)).map { index in
+            let startIndex = index * Constants.Common.mappingSize
+            let endIndex = index * Constants.Common.mappingSize + Constants.Common.mappingSize
             return Array(blockSpace[startIndex..<endIndex])
         }
     }
     
     var filesMappings: [(fileName: String, descriptorIndex: Int)] {
-        
-        guard
-            mode != .dataAndLink
-        else {
-            fatalError("Not able to add file link for this type of block")
-        }
-        
-        return mappingsChunks.compactMap { chunk in
-            
-            guard !chunk.isClear else {
-                return nil
-            }
-            
-            let fileName = chunk[..<Constants.fileNameSize].toFileName
-            let descriptorIndex = chunk[Constants.fileNameSize...].toInt
+        mappingsChunks.compactMap { chunk in
+            guard !chunk.isClear else { return nil }
+            let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
+            let descriptorIndex = chunk[Constants.Common.fileNameSize...].toInt
             return (fileName: fileName, descriptorIndex: descriptorIndex)
         }
     }
     
     var linkChunk: ByteArray {
-        guard
-            mode == .dataAndLink
-        else {
-            fatalError("Unable to get mapping chunks with mode != .mappingg")
-        }
-        
-        return Array(blockSpace[Constants.linkedBlockSize...])
+        Array(blockSpace[Constants.Block.dataSize...])
     }
     
     // MARK: - Lifecycle
@@ -104,16 +77,16 @@ final class Block {
             fatalError("Was not able to find empty slot to add a link for a file")
         }
         
-        let truncatedFileName = fileName.padding(Constants.fileNameSize)
+        let truncatedFileName = fileName.padding(Constants.Common.fileNameSize)
         let fileNameBytes: ByteArray = Array(truncatedFileName.utf8)
-        let descriptorIndexBytes: ByteArray = descriptorIndex.bytes
+        let descriptorIndexBytes: ByteArray = descriptorIndex.toBytes
         let data = fileNameBytes + descriptorIndexBytes
-        setData(data: data, offset: emptyFileMappingSlot * Constants.mappingSize)
+        setData(data: data, offset: emptyFileMappingSlot * Constants.Common.mappingSize)
     }
     
-
-    
-    func getDescriptorIndex(with name: String) -> Int {
+    func getDescriptorIndex(
+        with name: String
+    ) -> Int {
         
         let index = mappingsChunks
             .first { chunk in
@@ -122,11 +95,11 @@ final class Block {
                 else {
                     return false
                 }
-                let fileName = chunk[..<Constants.fileNameSize].toFileName
+                let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
                 return fileName == name
             }
             .map {
-                $0[Constants.fileNameSize...].toInt
+                $0[Constants.Common.fileNameSize...].toInt
             }
         
         guard
@@ -138,20 +111,21 @@ final class Block {
     }
         
     @discardableResult
-    func deleteFileMapping(with name: String) -> Bool {
-        
+    func deleteFileMapping(
+        with name: String
+    ) -> Bool {
         let chunk = mappingsChunks.enumerated().first { index, chunk in
             guard
                 !chunk.isClear
             else {
                 return false
             }
-            let fileName = chunk[..<Constants.fileNameSize].toFileName
+            let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
             return fileName == name
         }
         
         if let chunk = chunk {
-            setData(data: ByteArray(repeating: 0, count: Constants.mappingSize), offset: chunk.offset * Constants.mappingSize)
+            setData(data: ByteArray(size: Constants.Common.mappingSize), offset: chunk.offset * Constants.Common.mappingSize)
             return true
         } else {
             return false
@@ -160,10 +134,12 @@ final class Block {
     
     // MARK: - Common methods
     
-    func setData(data: ByteArray, offset: Int) {
-        
+    func setData(
+        data: ByteArray,
+        offset: Int
+    ) {
         guard
-            data.count + offset <= Constants.blockSize
+            data.count + offset <= Constants.Block.size
         else {
             fatalError("Out of space")
         }
@@ -178,10 +154,10 @@ extension Block: CustomStringConvertible {
     var description: String {
         switch mode {
         case .dataAndLink:
-            let data = blockSpace[0..<Constants.linkedBlockSize]
+            let data = blockSpace[0..<Constants.Block.dataSize]
                 .toString
                 .trim(.controlCharacters)
-                .padding(Constants.linkedBlockSize)
+                .padding(Constants.Block.dataSize)
             let linkNumber = linkChunk.toInt
             let link = linkNumber == 0 ? "-" : linkNumber.toString
                 .padding(toLength: 2, withPad: " ", startingAt: 0)
@@ -191,10 +167,10 @@ extension Block: CustomStringConvertible {
             return filesMappings
                 .compactMap { fileName, descriptorIndex in
                     let fileName = fileName
-                        .padding(Constants.fileNameSize)
+                        .padding(Constants.Common.fileNameSize)
                     let descriptorIndex = descriptorIndex
                         .toString
-                        .padding(Constants.intSize)
+                        .padding(Constants.Common.intSize)
                     return "\(fileName)\(descriptorIndex)"
                 }
                 .joined(separator: "|")

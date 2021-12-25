@@ -11,15 +11,15 @@ struct LinkCommand: Command {
     
     struct InputType {
         var name: String
-        var nameFileToLink: String
+        var linkName: String
     }
     
     static func execute(_ inputs: InputType) {
-        print("\n~$ link \(inputs.name) \(inputs.nameFileToLink)")
+        print("\n~$ link \(inputs.name) \(inputs.linkName)")
         FileSystem.link(
             to: inputs.name,
-            nameToLink: inputs.nameFileToLink
+            linkName: inputs.linkName
         )
-        print("File with name \(inputs.name) now have link \(inputs.nameFileToLink)")
+        print("File with name \"\(inputs.name)\" now have link \"\(inputs.linkName)\"")
     }
 }

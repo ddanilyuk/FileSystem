@@ -56,20 +56,26 @@ final class Descriptor {
     // MARK: - Public methods
     
     func updateSize() {
-        size = linksBlocks.count * Constants.linkedBlockSize
+        size = linksBlocks.count * Constants.Block.dataSize
     }
     
-    func initiateAsFile() {
-        
+    func initiateAsFile(_ blocks: [Int] = []) {
         isUsed = true
         mode = .file
         referenceCount = 0
         size = 0
-        linksBlocks = []
+        linksBlocks = blocks
+    }
+    
+    func initiateAsDirectory(_ blocks: [Int] = []) {
+        isUsed = true
+        mode = .directory
+        referenceCount = 1
+        linksBlocks = blocks
+        size = 0
     }
     
     func free() {
-        
         isUsed = false
         mode = .none
         referenceCount = 0

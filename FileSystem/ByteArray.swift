@@ -18,7 +18,7 @@ extension MutableCollection where Element == Byte {
     
     var toInt: Int {
         guard
-            count == Constants.intSize
+            count == Constants.Common.intSize
         else {
             fatalError("Invalid number of bytes")
         }
@@ -50,7 +50,7 @@ extension Array where Element == Byte {
 
 extension Int {
     
-    var bytes: ByteArray {
+    var toBytes: ByteArray {
         if self > UInt16.max {
             assertionFailure("Can't represent this value")
         }

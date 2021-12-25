@@ -19,7 +19,7 @@ struct LSCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
         print("\n~$ ls")
-        let fileName = "File name:".padding(Constants.fileNameSize)
+        let fileName = "File name:".padding(Constants.Common.fileNameSize)
         let descriptorMode = "Mode:".padding(10)
         let referenceCount = "References:".padding(12)
         let descriptorIndex = "Index:".padding(7)
@@ -28,7 +28,7 @@ struct LSCommand: Command {
         
         let data = FileSystem.ls()
             .map { line in
-                let fileName = line.fileName.padding(Constants.fileNameSize)
+                let fileName = line.fileName.padding(Constants.Common.fileNameSize)
                 let descriptorMode = line.mode.description.padding(10)
                 let referenceCount = line.referenceCount.toString.padding(12)
                 let descriptorIndex = line.descriptorIndex.toString.padding(7)
