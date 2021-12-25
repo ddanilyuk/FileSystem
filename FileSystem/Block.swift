@@ -46,6 +46,26 @@ final class Block {
         }
     }
     
+    var filesMappings: [(fileName: String, descriptorIndex: Int)] {
+        
+        guard
+            mode != .dataAndLink
+        else {
+            fatalError("Not able to add file link for this type of block")
+        }
+        
+        return mappingsChunks.compactMap { chunk in
+            
+            guard !chunk.isClear else {
+                return nil
+            }
+            
+            let fileName = chunk[..<Constants.fileNameSize].toFileName
+            let descriptorIndex = chunk[Constants.fileNameSize...].toInt
+            return (fileName: fileName, descriptorIndex: descriptorIndex)
+        }
+    }
+    
     var linkChunk: ByteArray {
         guard
             mode == .dataAndLink
@@ -78,9 +98,8 @@ final class Block {
         else {
             fatalError("Not able to add file link for this type of block")
         }
-        
         guard
-            let emptyMappingSlot = mappingsChunks.enumerated().first(where: { $1.isClear })?.offset
+            let emptyFileMappingSlot = mappingsChunks.enumerated().first(where: { $1.isClear })?.offset
         else {
             fatalError("Was not able to find empty slot to add a link for a file")
         }
@@ -89,34 +108,18 @@ final class Block {
         let fileNameBytes: ByteArray = Array(truncatedFileName.utf8)
         let descriptorIndexBytes: ByteArray = descriptorIndex.bytes
         let data = fileNameBytes + descriptorIndexBytes
-        setData(data: data, offset: emptyMappingSlot * Constants.mappingSize)
+        setData(data: data, offset: emptyFileMappingSlot * Constants.mappingSize)
     }
     
-    func getFilesMappings() -> [(fileName: String, descriptorIndex: Int)] {
-        
-        guard
-            mode != .dataAndLink
-        else {
-            fatalError("Not able to add file link for this type of block")
-        }
-        
-        return mappingsChunks.compactMap { chunk in
-            
-            guard !chunk.isClear else {
-                return nil
-            }
-                        
-            let fileName = chunk[..<Constants.fileNameSize].toFileName
-            let descriptorIndex = chunk[Constants.fileNameSize...].toInt
-            return (fileName: fileName, descriptorIndex: descriptorIndex)
-        }
-    }
+
     
     func getDescriptorIndex(with name: String) -> Int {
         
         let index = mappingsChunks
             .first { chunk in
-                guard !chunk.isClear else {
+                guard
+                    !chunk.isClear
+                else {
                     return false
                 }
                 let fileName = chunk[..<Constants.fileNameSize].toFileName
@@ -138,7 +141,9 @@ final class Block {
     func deleteFileMapping(with name: String) -> Bool {
         
         let chunk = mappingsChunks.enumerated().first { index, chunk in
-            guard !chunk.isClear else {
+            guard
+                !chunk.isClear
+            else {
                 return false
             }
             let fileName = chunk[..<Constants.fileNameSize].toFileName
@@ -183,7 +188,7 @@ extension Block: CustomStringConvertible {
             return data + "|" + link
             
         case .mappings:
-            return getFilesMappings()
+            return filesMappings
                 .compactMap { fileName, descriptorIndex in
                     let fileName = fileName
                         .padding(Constants.fileNameSize)

@@ -26,7 +26,7 @@ struct LSCommand: Command {
         let descriptorSize = "Size:".padding(6)
         print("\(fileName) \(descriptorMode) \(referenceCount) \(descriptorIndex) \(descriptorSize)")
         
-        let data = FileSystemDriver.shared.ls()
+        let data = FileSystem.ls()
             .map { line in
                 let fileName = line.fileName.padding(Constants.fileNameSize)
                 let descriptorMode = line.mode.description.padding(10)

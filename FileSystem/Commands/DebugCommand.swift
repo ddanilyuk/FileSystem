@@ -22,12 +22,12 @@ struct DebugCommand: Command {
         let dataDescription = "Data:"
         print("\(number) \(isUsed) \(dataDescription)")
         
-        let data = FileSystemDriver.shared.blocks
+        let data = FileSystem.blocks
             .enumerated()
             .filter { !$1.blockSpace.isClear }
             .map {
                 let number = "#\($0.toString)".padding(3)
-                let isUsed = FileSystemDriver.shared.blocksBitMap.test(position: $0) ? "Used    " : "Not Used"
+                let isUsed = FileSystem.blocksBitMap.test(position: $0) ? "Used    " : "Not Used"
                 let dataDescription = $1.description
                 return "\(number) \(isUsed) \(dataDescription)" }
             .joined(separator: "\n")
@@ -41,7 +41,7 @@ struct DebugCommand: Command {
         let linkedBlocks = "Linked blocks:"
         print("\(descriptorNumber) \(descriptorMode) \(linkedBlocks)")
         
-        let data = FileSystemDriver.shared.descriptors
+        let data = FileSystem.descriptors
             .enumerated()
             .map {
                 let descriptorNumber = "#\($0)".padding(4)

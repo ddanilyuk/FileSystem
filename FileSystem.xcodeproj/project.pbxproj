@@ -23,7 +23,7 @@
 		5F2621952776A53600BBD6E2 /* UnlinkCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2621942776A53600BBD6E2 /* UnlinkCommand.swift */; };
 		5F2621972776A69E00BBD6E2 /* CloseCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2621962776A69E00BBD6E2 /* CloseCommand.swift */; };
 		5F60A6032762B6250001804A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6022762B6250001804A /* main.swift */; };
-		5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6092762B6300001804A /* FileSystemDriver.swift */; };
+		5F60A60A2762B6300001804A /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6092762B6300001804A /* FileSystem.swift */; };
 		5F60A60C2762B6340001804A /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60B2762B6340001804A /* Block.swift */; };
 		5F60A60E2762B6410001804A /* Descriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60D2762B6410001804A /* Descriptor.swift */; };
 		5F60A6102762B7480001804A /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60F2762B7480001804A /* Constants.swift */; };
@@ -62,7 +62,7 @@
 		5F2621962776A69E00BBD6E2 /* CloseCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseCommand.swift; sourceTree = "<group>"; };
 		5F60A5FF2762B6250001804A /* FileSystem */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FileSystem; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F60A6022762B6250001804A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		5F60A6092762B6300001804A /* FileSystemDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemDriver.swift; sourceTree = "<group>"; };
+		5F60A6092762B6300001804A /* FileSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystem.swift; sourceTree = "<group>"; };
 		5F60A60B2762B6340001804A /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		5F60A60D2762B6410001804A /* Descriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Descriptor.swift; sourceTree = "<group>"; };
 		5F60A60F2762B7480001804A /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -127,7 +127,7 @@
 				5F60A60B2762B6340001804A /* Block.swift */,
 				5F60A60F2762B7480001804A /* Constants.swift */,
 				5F60A60D2762B6410001804A /* Descriptor.swift */,
-				5F60A6092762B6300001804A /* FileSystemDriver.swift */,
+				5F60A6092762B6300001804A /* FileSystem.swift */,
 				5F2621792776023900BBD6E2 /* Commands */,
 				5FF3C430276FBA6500F427ED /* BitMap.swift */,
 				5FF3C432276FBEBF00F427ED /* ByteArray.swift */,
@@ -199,7 +199,7 @@
 				5F60A6102762B7480001804A /* Constants.swift in Sources */,
 				5FF3C433276FBEBF00F427ED /* ByteArray.swift in Sources */,
 				5F60A60C2762B6340001804A /* Block.swift in Sources */,
-				5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */,
+				5F60A60A2762B6300001804A /* FileSystem.swift in Sources */,
 				5F262185277602A300BBD6E2 /* WriteCommand.swift in Sources */,
 				5F2621972776A69E00BBD6E2 /* CloseCommand.swift in Sources */,
 				5F26218F277654C300BBD6E2 /* Extensions.swift in Sources */,

@@ -11,7 +11,7 @@ struct UMountCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
         print("\n~$ umount")
-        FileSystemDriver.shared.umount()
+        FileSystem.umount()
         print("Successfully unmounted")
     }
 }

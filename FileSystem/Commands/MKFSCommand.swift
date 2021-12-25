@@ -11,7 +11,7 @@ struct MKFSCommand: Command {
         
     static func execute(_ numberOfDescriptors: Int) {
         print("\n~$ mkfs \(numberOfDescriptors)")
-        FileSystemDriver.shared.generateDescriptors(numberOfDescriptors)
+        FileSystem.generateDescriptors(numberOfDescriptors)
         print("\(numberOfDescriptors) descriptors generated")
     }
 }

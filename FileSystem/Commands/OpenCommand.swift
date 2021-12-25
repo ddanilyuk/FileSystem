@@ -11,7 +11,7 @@ struct OpenCommand: Command {
         
     static func execute(_ name: String) -> Int {
         print("\n~$ open")
-        let result = FileSystemDriver.shared.openFile(with: name)
+        let result = FileSystem.openFile(with: name)
         print("File opened with id: \(result)")
         return result
     }

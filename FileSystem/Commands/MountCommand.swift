@@ -11,7 +11,7 @@ struct MountCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
         print("\n~$ mount")
-        FileSystemDriver.shared.mountFromMemory()
+        FileSystem.mountFromMemory()
         print("Successfully mounted")
     }
 }

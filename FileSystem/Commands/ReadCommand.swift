@@ -17,7 +17,7 @@ struct ReadCommand: Command {
     
     static func execute(_ inputs: InputType) {
         print("\n~$ read \(inputs.numericOpenedFileDescriptor)")
-        let result = FileSystemDriver.shared.readFile(
+        let result = FileSystem.readFile(
             from: inputs.numericOpenedFileDescriptor,
             offset: inputs.offset,
             size: inputs.size
