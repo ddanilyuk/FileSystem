@@ -193,8 +193,8 @@ extension FileSystemDriver {
         // Allocate enough blocks for write if needed
         if totalSize > descriptor.size {
             let delta = totalSize - descriptor.size
-            let neededBlocksCount = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.linkedBlockSize))
-            (0..<neededBlocksCount).forEach { _ in appendBlock(to: descriptor, blockNumber: blocksBitMap.firstEmpty()) }
+            let numberOfNeededBlocksToAllocate = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.linkedBlockSize))
+            (0..<numberOfNeededBlocksToAllocate).forEach { _ in allocateNewBlock(for: descriptor, newBlockIndex: blocksBitMap.firstEmpty()) }
         }
         
         var blocksToWrite = getBlocks(
@@ -268,7 +268,7 @@ extension FileSystemDriver {
         
         if size > descriptor.size {
             let neededBlocksCount = CGFloat.roundUp(CGFloat(size - descriptor.size) / CGFloat(Constants.linkedBlockSize))
-            (0..<neededBlocksCount).forEach { _ in appendBlock(to: descriptor, blockNumber: blocksBitMap.firstEmpty()) }
+            (0..<neededBlocksCount).forEach { _ in allocateNewBlock(for: descriptor, newBlockIndex: blocksBitMap.firstEmpty()) }
             descriptor.updateSize()
             
         } else if size < descriptor.size {
@@ -346,8 +346,7 @@ extension FileSystemDriver {
     }
     
     private func getDescriptor(with name: String) -> (descriptorIndex: Int,
-                                              descriptor: Descriptor) {
-        
+                                                      descriptor: Descriptor) {
         let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
         return (descriptorIndex: descriptorIndex,
                 descriptor: descriptors[descriptorIndex])
@@ -363,22 +362,19 @@ extension FileSystemDriver {
         return (firstBlockIndex..<lastBlockIndex).map { blocks[descriptor.linksBlocks[$0]] }
     }
     
-    private func appendBlock(
-        to descriptor: Descriptor,
-        blockNumber: Int
+    private func allocateNewBlock(
+        for descriptor: Descriptor,
+        newBlockIndex: Int
     ) {
         
-        if let lastBlockId = descriptor.linksBlocks.last {
-            let lastBlock = blocks[lastBlockId]
-            let blockNumberBytes = blockNumber.bytes
-            lastBlock.mode = .dataAndLink
-            lastBlock.blockSpace.replaceSubrange(
+        if let lastBlockIndex = descriptor.linksBlocks.last {
+            blocks[lastBlockIndex].blockSpace.replaceSubrange(
                 (Constants.linkedBlockSize..<Constants.blockSize),
-                with: blockNumberBytes
+                with: newBlockIndex.bytes
             )
         }
         
-        blocks[blockNumber].mode = .dataAndLink
-        descriptor.linksBlocks.append(blockNumber)
+        blocks[newBlockIndex].mode = .dataAndLink
+        descriptor.linksBlocks.append(newBlockIndex)
     }
 }
