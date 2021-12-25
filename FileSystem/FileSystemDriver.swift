@@ -246,10 +246,13 @@ extension FileSystemDriver {
         }
         
         let descriptor = descriptors[descriptorIndex]
+        
         // Read full if nil
         let size = size ?? descriptor.size
         
-        guard offset + size <= descriptor.size else {
+        guard
+            offset + size <= descriptor.size
+        else {
             fatalError("Offset is bigger than size")
         }
                 
@@ -282,45 +285,45 @@ extension FileSystemDriver {
         let lastBlockIndex = CGFloat.roundUp(CGFloat(totalSize) / CGFloat(Constants.linkedBlockSize))
         return (firstBlockIndex..<lastBlockIndex).map { blocks[descriptor.linksBlocks[$0]] }
     }
+}
+
+// MARK: - Truncate
+
+extension FileSystemDriver {
     
-    func truncateFile(with name: String, size: Int) {
+    func truncateFile(with name: String, to size: Int) {
         
         let descriptor = getDescriptor(with: name).descriptor
         
         if size > descriptor.size {
-            print("Increasing size")
-            let delta = size - descriptor.size
-            let neededBlocksCount = Int(ceil(CGFloat(delta) / CGFloat(Constants.linkedBlockSize)))
-            for _ in 0..<neededBlocksCount {
-                appendBlock(to: descriptor, blockNumber: blocksBitMap.firstEmpty())
-            }
+            let neededBlocksCount = CGFloat.roundUp(CGFloat(size - descriptor.size) / CGFloat(Constants.linkedBlockSize))
+            (0..<neededBlocksCount).forEach { _ in appendBlock(to: descriptor, blockNumber: blocksBitMap.firstEmpty()) }
             descriptor.updateSize()
             
         } else if size < descriptor.size {
-            print("Decreasing size of a file")
-            let neededBlocksCount = Int(ceil(CGFloat(size) / CGFloat(Constants.linkedBlockSize)))
-            let blockDelta = descriptor.linksBlocks.count - neededBlocksCount
-            
-            let deletedBlocks = descriptor.linksBlocks
-                .removeLast(blockDelta)
-
-            let blockTruncateOffset = size % Constants.linkedBlockSize
+            // Delete blocks
+            let neededBlocksCount = CGFloat.roundUp(CGFloat(size) / CGFloat(Constants.linkedBlockSize))
+            let deletedBlocks = descriptor.linksBlocks.removeLast(descriptor.linksBlocks.count - neededBlocksCount)
             deletedBlocks.forEach { blocksBitMap.reset(position: $0) }
-            if let lastBlockId = descriptor.linksBlocks.last {
-                let block = blocks[lastBlockId]
-                block.setData(
-                    data: ByteArray(size: Constants.linkedBlockSize - blockTruncateOffset),
-                    offset: blockTruncateOffset
+            // Clean last block
+            if let lastBlockIndex = descriptor.linksBlocks.last {
+                let lasBlock = blocks[lastBlockIndex]
+                let lastBlockTruncateOffset = size % Constants.linkedBlockSize
+                // Remove data
+                lasBlock.setData(
+                    data: ByteArray(size: Constants.linkedBlockSize - lastBlockTruncateOffset),
+                    offset: lastBlockTruncateOffset
                 )
-                block.setData(
+                // Remove link
+                lasBlock.setData(
                     data: ByteArray(size: Constants.intSize),
                     offset: Constants.linkedBlockSize
                 )
             }
             descriptor.updateSize()
-
+            
         } else {
-            print("Size was not changed")
+            print("Size remains the same")
         }
     }
 }
@@ -344,8 +347,7 @@ extension FileSystemDriver {
         let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
         let descriptor = descriptors[descriptorIndex]
         let block = blocks[rootDirectory.linksBlocks[0]]
-        let result = block.deleteFileMapping(with: name)
-        print(result)
+        block.deleteFileMapping(with: name)
         descriptor.referenceCount -= 1
         
         if descriptor.referenceCount == 0 {

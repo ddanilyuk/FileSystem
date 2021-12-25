@@ -18,6 +18,10 @@
 		5F26218B2776296500BBD6E2 /* UMountCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F26218A2776296400BBD6E2 /* UMountCommand.swift */; };
 		5F26218D27762CA000BBD6E2 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F26218C27762CA000BBD6E2 /* Tests.swift */; };
 		5F26218F277654C300BBD6E2 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F26218E277654C300BBD6E2 /* Extensions.swift */; };
+		5F26219127768A5400BBD6E2 /* TruncateCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F26219027768A5400BBD6E2 /* TruncateCommand.swift */; };
+		5F2621932776A4A900BBD6E2 /* LinkCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2621922776A4A900BBD6E2 /* LinkCommand.swift */; };
+		5F2621952776A53600BBD6E2 /* UnlinkCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2621942776A53600BBD6E2 /* UnlinkCommand.swift */; };
+		5F2621972776A69E00BBD6E2 /* CloseCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2621962776A69E00BBD6E2 /* CloseCommand.swift */; };
 		5F60A6032762B6250001804A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6022762B6250001804A /* main.swift */; };
 		5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6092762B6300001804A /* FileSystemDriver.swift */; };
 		5F60A60C2762B6340001804A /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A60B2762B6340001804A /* Block.swift */; };
@@ -52,6 +56,10 @@
 		5F26218A2776296400BBD6E2 /* UMountCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UMountCommand.swift; sourceTree = "<group>"; };
 		5F26218C27762CA000BBD6E2 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		5F26218E277654C300BBD6E2 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		5F26219027768A5400BBD6E2 /* TruncateCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruncateCommand.swift; sourceTree = "<group>"; };
+		5F2621922776A4A900BBD6E2 /* LinkCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkCommand.swift; sourceTree = "<group>"; };
+		5F2621942776A53600BBD6E2 /* UnlinkCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlinkCommand.swift; sourceTree = "<group>"; };
+		5F2621962776A69E00BBD6E2 /* CloseCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseCommand.swift; sourceTree = "<group>"; };
 		5F60A5FF2762B6250001804A /* FileSystem */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FileSystem; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F60A6022762B6250001804A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		5F60A6092762B6300001804A /* FileSystemDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemDriver.swift; sourceTree = "<group>"; };
@@ -84,9 +92,13 @@
 				5F26217C2776025300BBD6E2 /* MKFSCommand.swift */,
 				5F2621802776027900BBD6E2 /* CreateCommand.swift */,
 				5F2621822776029700BBD6E2 /* OpenCommand.swift */,
+				5F2621962776A69E00BBD6E2 /* CloseCommand.swift */,
 				5F262184277602A300BBD6E2 /* WriteCommand.swift */,
 				5F262186277602AF00BBD6E2 /* ReadCommand.swift */,
 				5F262188277602CB00BBD6E2 /* DebugCommand.swift */,
+				5F26219027768A5400BBD6E2 /* TruncateCommand.swift */,
+				5F2621922776A4A900BBD6E2 /* LinkCommand.swift */,
+				5F2621942776A53600BBD6E2 /* UnlinkCommand.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -189,11 +201,15 @@
 				5F60A60C2762B6340001804A /* Block.swift in Sources */,
 				5F60A60A2762B6300001804A /* FileSystemDriver.swift in Sources */,
 				5F262185277602A300BBD6E2 /* WriteCommand.swift in Sources */,
+				5F2621972776A69E00BBD6E2 /* CloseCommand.swift in Sources */,
 				5F26218F277654C300BBD6E2 /* Extensions.swift in Sources */,
 				5F262189277602CB00BBD6E2 /* DebugCommand.swift in Sources */,
+				5F26219127768A5400BBD6E2 /* TruncateCommand.swift in Sources */,
+				5F2621932776A4A900BBD6E2 /* LinkCommand.swift in Sources */,
 				5F262187277602AF00BBD6E2 /* ReadCommand.swift in Sources */,
 				5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */,
 				5F2621812776027900BBD6E2 /* CreateCommand.swift in Sources */,
+				5F2621952776A53600BBD6E2 /* UnlinkCommand.swift in Sources */,
 				5F60A6142762BB790001804A /* Command.swift in Sources */,
 				5F26217B2776024700BBD6E2 /* MountCommand.swift in Sources */,
 				5F26217D2776025300BBD6E2 /* MKFSCommand.swift in Sources */,

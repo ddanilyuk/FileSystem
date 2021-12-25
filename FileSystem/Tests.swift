@@ -12,7 +12,7 @@ struct Tests {
     static func testCreateWriteReadFile() {
         
         let fileName = "Test.txt"
-        let data = "Heh its new data bitch."
+        let data = "Here is test data."
         
         // Setup
         MountCommand.execute()
@@ -164,5 +164,138 @@ struct Tests {
         
         // Umount
         UMountCommand.execute()
+    }
+    
+    static func testTruncate() {
+        let fileName1 = "Big.file"
+        let data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam in posuere tellus. Mauris non dui augue. Nullam eget maximusus odio. Donec finibus, leo vel placerat facilisis, libero orci pellentesque nisi, eu eleifend urna urna sed est. Mauris porttitor ex nec justo volutpat, in tincidunt orci euismod. Etiam rutrum dui eget fermentum malesuada. Nullam odio dolor, cursus sit amet tincidunt ac, suscipit at ligula. Praesent quis pellentesque risus, ac accumsan mi."
+        let truncateSize = 40
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create
+        CreateCommand.execute(fileName1)
+        
+        // Check
+        LSCommand.execute()
+        
+        // Open
+        let openedFileIndex = OpenCommand.execute(fileName1)
+        
+        // Write
+        WriteCommand.execute(
+            WriteCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                data: data
+            )
+        )
+        
+        // Read before truncate
+        ReadCommand.execute(
+            ReadCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                size: data.count
+            )
+        )
+        
+        // Truncate
+        TruncateCommand.execute(
+            TruncateCommand.InputType(
+                name: fileName1,
+                size: truncateSize
+            )
+        )
+        
+        // Read after truncate
+        ReadCommand.execute(
+            ReadCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                size: truncateSize
+            )
+        )
+        
+        // Check blocks
+        DebugCommand.execute()
+        
+        // Umount
+        UMountCommand.execute()
+    }
+    
+    static func testLinks() {
+        
+        let fileName = "Test.txt"
+        let data = "Here is test data."
+        let link1 = "Link.link"
+        let link2 = "Another link"
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create
+        CreateCommand.execute(fileName)
+        LSCommand.execute()
+        
+        // Open
+        let openedFileIndex = OpenCommand.execute(fileName)
+        
+        // Write
+        WriteCommand.execute(
+            WriteCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                data: data
+            )
+        )
+        
+        // Read
+        ReadCommand.execute(
+            ReadCommand.InputType(
+                numericOpenedFileDescriptor: openedFileIndex,
+                offset: 0,
+                size: data.count
+            )
+        )
+        
+        // Close
+        CloseCommand.execute(openedFileIndex)
+        
+        // Create first link and check it
+        LinkCommand.execute(
+            LinkCommand.InputType(
+                name: fileName,
+                nameFileToLink: link1
+            )
+        )
+        LSCommand.execute()
+        
+        // Create second link and check it
+        LinkCommand.execute(
+            LinkCommand.InputType(
+                name: fileName,
+                nameFileToLink: link2
+            )
+        )
+        LSCommand.execute()
+        
+        // Unlink first link
+        UnlinkCommand.execute(link1)
+        LSCommand.execute()
+        
+        // Open second link and read data
+        let openedLinkIndex = OpenCommand.execute(link2)
+        ReadCommand.execute(
+            ReadCommand.InputType(
+                numericOpenedFileDescriptor: openedLinkIndex,
+                offset: 0,
+                size: data.count
+            )
+        )
+        LSCommand.execute()
     }
 }
