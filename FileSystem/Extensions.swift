@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - Dictionary
+
 extension Dictionary where Key == Int {
     
     var uniqueKey: Int {
@@ -18,18 +20,28 @@ extension Dictionary where Key == Int {
     }
 }
 
+// MARK: - Collection
+
 extension Collection {
     
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
-    subscript (safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
+    subscript(
+        safe index: Index
+    ) -> Element? {
+        indices.contains(index)
+            ? self[index]
+            : nil
     }
 }
 
+// MARK: - Array
+
 extension Array {
     
-    mutating func removeLast(_ numberOfElementsToRemove: Int) -> [Element] {
-        (0..<numberOfElementsToRemove).map { _ in removeLast() }
+    mutating func removeLast(
+        _ k: Int
+    ) -> [Element] {
+        (0..<k).map { _ in removeLast() }
     }
     
     func chunked(
@@ -37,19 +49,17 @@ extension Array {
         from position: Int = 0,
         to element: Int? = nil
     ) -> [[Element]] {
-        let element = element == nil ? count : element!
-        return stride(from: position, to: element, by: size).map {
+        stride(
+            from: position,
+            to: element == nil ? count : element!,
+            by: size
+        ).map {
             Array(self[$0 ..< Swift.min($0 + size, count)])
         }
     }
 }
 
-extension String {
-    
-    func padding(_ length: Int) -> String {
-        return padding(toLength: length, withPad: " ", startingAt: 0)
-    }
-}
+// MARK: - Int
 
 extension Int {
     
@@ -58,12 +68,18 @@ extension Int {
     }
 }
 
+// MARK: - CGFloat
+
 extension CGFloat {
     
-    static func roundUp(_ number: Self) -> Int {
-        return Int(ceil(number))
+    static func roundUp(
+        _ number: Self
+    ) -> Int {
+        Int(ceil(number))
     }
 }
+
+// MARK: - String
 
 extension String {
     
@@ -75,7 +91,9 @@ extension String {
         static let controlCharacters = TrimOptionSet(rawValue: 1 << 1)
     }
     
-    func trim(_ optionSet: TrimOptionSet) -> String {
+    func trim(
+        _ optionSet: TrimOptionSet
+    ) -> String {
         
         var characterSet = CharacterSet()
         
@@ -86,5 +104,15 @@ extension String {
             characterSet = characterSet.union(.controlCharacters)
         }
         return trimmingCharacters(in: characterSet)
+    }
+    
+    func padding(
+        _ length: Int
+    ) -> String {
+        padding(
+            toLength: length,
+            withPad: " ",
+            startingAt: 0
+        )
     }
 }

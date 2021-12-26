@@ -10,7 +10,9 @@ import Foundation
 typealias Byte = UInt8
 typealias ByteArray = [Byte]
 
-extension MutableCollection where Element == Byte {
+// MARK: - MutableCollection
+
+extension MutableCollection where Element == Byte, Index == Int {
     
     var isClear: Bool {
         !contains { $0 != 0 }
@@ -22,7 +24,7 @@ extension MutableCollection where Element == Byte {
         else {
             fatalError("Invalid number of bytes")
         }
-            
+        
         return reduce(0) { soFar, byte in
             return soFar << 8 | Int(byte)
         }
@@ -39,7 +41,25 @@ extension MutableCollection where Element == Byte {
     var toFileName: String {
         toString.trim([.controlCharacters, .whitespaces])
     }
+    
+    var fileNameChunk: ByteArray {
+        ByteArray(self[0..<Constants.Common.fileNameSize])
+    }
+    
+    var descriptorIndexChunk: ByteArray {
+        ByteArray(self[Constants.Common.fileNameSize...])
+    }
+    
+    var dataChunk: ByteArray {
+        ByteArray(self[..<Constants.Block.dataSize])
+    }
+    
+    var linkChunk: ByteArray {
+        ByteArray(self[Constants.Block.dataSize...])
+    }
 }
+
+// MARK: - Convenience empty init
 
 extension Array where Element == Byte {
     
@@ -48,12 +68,18 @@ extension Array where Element == Byte {
     }
 }
 
+// MARK: - Int
+
 extension Int {
     
     var toBytes: ByteArray {
-        if self > UInt16.max {
-            assertionFailure("Can't represent this value")
-        }
-        return [UInt8(self >> 8 & 0xff), UInt8(self & 0xff)]
+        [Byte(self >> 8 & 0xff), Byte(self & 0xff)]
+    }
+}
+
+extension String {
+    
+    var toBytes: ByteArray {
+        ByteArray(utf8)
     }
 }

@@ -10,11 +10,14 @@ import Foundation
 final class FileSystem {
     
     // MARK: - Properties
-        
-    static var blocksBitMap: BitMap!
     
+    /// Bit for blocks
+    static var blocksBitMap: BitMap!
+
+    /// All blocks
     static var blocks: [Block]!
     
+    /// All descriptors
     static var descriptors: [Descriptor] = []
     
     /// `[numericOpenedFileDescriptor : fileDescriptorIndex]`
@@ -23,11 +26,8 @@ final class FileSystem {
     
     // MARK: - Computed property
     
-    static var rootDirectory: Descriptor {
-        descriptors.first!
-    }
     static var rootBlock: Block {
-        blocks[rootDirectory.linksBlocks[0]]
+        blocks[descriptors.first!.linksBlocks[0]]
     }
     
     // MARK: - Lifecycle
@@ -63,14 +63,15 @@ final class FileSystem {
         let byteArray = ByteArray(
             size: Constants.Block.amount * Constants.Block.size
         )
-        return (0..<Constants.Block.amount).map { index in
-            let startBlockSpace = Constants.Block.size * index
-            let endBlockSpace = Constants.Block.size * index + Constants.Block.size
-            return Block(
-                mode: .none,
-                blockSpace: Array(byteArray[startBlockSpace..<endBlockSpace])
-            )
-        }
+        return (0..<Constants.Block.amount)
+            .map { index in
+                let startBlockSpace = Constants.Block.size * index
+                let endBlockSpace = Constants.Block.size * index + Constants.Block.size
+                return Block(
+                    mode: .none,
+                    blockSpace: Array(byteArray[startBlockSpace..<endBlockSpace])
+                )
+            }
     }
 }
 
@@ -79,13 +80,11 @@ final class FileSystem {
 extension FileSystem {
     
     static func mountFromMemory() {
-        
         blocksBitMap = generateBlocksBitMap()
         blocks = generateBlocks()
     }
     
     static func umount() {
-        
         openedFiles = [:]
         descriptors = []
         blocksBitMap = nil
@@ -128,11 +127,11 @@ extension FileSystem {
         let (descriptorIndex, descriptor) = findFreeDescriptor()
         print("Find free descriptor with index: \(descriptorIndex)")
         descriptor.initiateAsFile()
+        descriptor.referenceCount += 1
         rootBlock.createFileMapping(
             fileName: name,
             descriptorIndex: descriptorIndex
         )
-        descriptor.referenceCount = 1
     }
 }
 
@@ -145,7 +144,8 @@ extension FileSystem {
         with name: String
     ) -> Int {
         let numericOpenedFileDescriptor = openedFiles.uniqueKey
-        openedFiles[numericOpenedFileDescriptor] = getDescriptor(with: name).descriptorIndex
+        openedFiles[numericOpenedFileDescriptor] = getDescriptor(with: name)
+            .descriptorIndex
         return numericOpenedFileDescriptor
     }
     
@@ -155,7 +155,7 @@ extension FileSystem {
         guard
             openedFiles[numericOpenedFileDescriptor] != nil
         else {
-            fatalError("File was not opened")
+            fatalError("File is closed")
         }
         openedFiles.removeValue(forKey: numericOpenedFileDescriptor)
     }
@@ -173,7 +173,7 @@ extension FileSystem {
         guard
             let descriptorIndex = openedFiles[numericOpenedFileDescriptor]
         else {
-            fatalError("File was not opened")
+            fatalError("File is closed")
         }
         let descriptor = descriptors[descriptorIndex]
         writeData(to: descriptor, offset: offset, data: data)
@@ -185,30 +185,31 @@ extension FileSystem {
         offset: Int,
         data: String
     ) {
-        guard
-            descriptor.mode == .file
-        else {
+        switch descriptor.mode {
+        case .file:
+            let totalSize = offset + data.count
+            
+            // Allocate enough blocks
+            if totalSize > descriptor.size {
+                let delta = totalSize - descriptor.size
+                let numberOfNeededBlocksToAllocate = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.Block.dataSize))
+                (0..<numberOfNeededBlocksToAllocate).forEach { _ in allocateNewBlock(for: descriptor, newBlockIndex: blocksBitMap.firstEmpty()) }
+            }
+            
+            var blocksToWrite = getBlocks(
+                from: descriptor,
+                with: offset,
+                totalSize: totalSize
+            )
+            var dataChunks = data.toBytes.chunked(into: Constants.Block.dataSize)
+            
+            // Set data
+            blocksToWrite.removeFirst().setData(data: dataChunks.removeFirst(), offset: offset)
+            zip(blocksToWrite, dataChunks).forEach { $0.setData(data: $1, offset: 0) }
+            
+        default:
             fatalError("Unable to write not for file")
         }
-        let totalSize = offset + data.count
-        
-        // Allocate enough blocks
-        if totalSize > descriptor.size {
-            let delta = totalSize - descriptor.size
-            let numberOfNeededBlocksToAllocate = CGFloat.roundUp(CGFloat(delta) / CGFloat(Constants.Block.dataSize))
-            (0..<numberOfNeededBlocksToAllocate).forEach { _ in allocateNewBlock(for: descriptor, newBlockIndex: blocksBitMap.firstEmpty()) }
-        }
-        
-        var blocksToWrite = getBlocks(
-            from: descriptor,
-            with: offset,
-            totalSize: totalSize
-        )
-        var dataChunks = Array(data.utf8).chunked(into: Constants.Block.dataSize)
-        
-        // Set data
-        blocksToWrite.removeFirst().setData(data: dataChunks.removeFirst(), offset: offset)
-        zip(blocksToWrite, dataChunks).forEach { $0.setData(data: $1, offset: 0) }
     }
 }
 
@@ -221,25 +222,28 @@ extension FileSystem {
         offset: Int = 0,
         size: Int?
     ) -> String? {
-        
         guard
             let descriptorIndex = openedFiles[numericOpenedFileDescriptor]
         else {
-            fatalError("File was not opened")
+            fatalError("File is closed")
         }
         
         let descriptor = descriptors[descriptorIndex]
         
-        // Read all if nil
-        let size = size ?? descriptor.size
-        
-        guard
-            offset + size <= descriptor.size
-        else {
-            fatalError("Offset is bigger than size")
+        switch descriptor.mode {
+        case .file:
+            // Read all if nil
+            let size = size ?? descriptor.size
+            guard
+                offset + size <= descriptor.size
+            else {
+                fatalError("Offset is bigger than size")
+            }
+            return readFrom(descriptor, offset: offset, size: size).toString
+            
+        default:
+            fatalError("Unable to read not a file")
         }
-                
-        return readFrom(descriptor, offset: offset, size: size).toString
     }
     
     static private func readFrom(
@@ -247,14 +251,13 @@ extension FileSystem {
         offset: Int,
         size: Int
     ) -> ByteArray {
-        
         let blocksToRead = getBlocks(
             from: descriptor,
             with: offset,
             totalSize: offset + size
         )
         let blocksSpaces = blocksToRead
-            .map { $0.blockSpace[..<Constants.Block.dataSize] }
+            .map { $0.blockSpace.dataChunk }
             .joined()
         return Array(Array(blocksSpaces)[offset..<offset + size])
     }
@@ -321,10 +324,8 @@ extension FileSystem {
     static func unlink(
         name: String
     ) {
-        let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
-        let descriptor = descriptors[descriptorIndex]
-        let block = blocks[rootDirectory.linksBlocks[0]]
-        block.deleteFileMapping(with: name)
+        let descriptor = descriptors[rootBlock.getDescriptorIndex(with: name)]
+        rootBlock.deleteFileMapping(with: name)
         descriptor.referenceCount -= 1
         
         if descriptor.referenceCount == 0 {
@@ -358,8 +359,10 @@ extension FileSystem {
         descriptor: Descriptor
     ) {
         let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
-        return (descriptorIndex: descriptorIndex,
-                descriptor: descriptors[descriptorIndex])
+        return (
+            descriptorIndex: descriptorIndex,
+            descriptor: descriptors[descriptorIndex]
+        )
     }
     
     static private func getBlocks(

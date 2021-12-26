@@ -9,12 +9,12 @@ import Foundation
 
 //Tests.testCreateWriteReadFile()
 
-//Tests.testCreate4Files()
+Tests.testCreate4Files()
 
-//Tests.testBigFile()
+Tests.testBigFile()
 
 //Tests.testOffset()
 
 //Tests.testTruncate()
 
-Tests.testLinks()
+//Tests.testLinks()

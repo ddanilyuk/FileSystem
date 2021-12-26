@@ -32,21 +32,17 @@ final class Block {
         (0..<(blockSpace.count / Constants.Common.mappingSize)).map { index in
             let startIndex = index * Constants.Common.mappingSize
             let endIndex = index * Constants.Common.mappingSize + Constants.Common.mappingSize
-            return Array(blockSpace[startIndex..<endIndex])
+            return ByteArray(blockSpace[startIndex..<endIndex])
         }
     }
     
     var filesMappings: [(fileName: String, descriptorIndex: Int)] {
         mappingsChunks.compactMap { chunk in
             guard !chunk.isClear else { return nil }
-            let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
-            let descriptorIndex = chunk[Constants.Common.fileNameSize...].toInt
+            let fileName = chunk.fileNameChunk.toFileName
+            let descriptorIndex = chunk.descriptorIndexChunk.toInt
             return (fileName: fileName, descriptorIndex: descriptorIndex)
         }
-    }
-    
-    var linkChunk: ByteArray {
-        Array(blockSpace[Constants.Block.dataSize...])
     }
     
     // MARK: - Lifecycle
@@ -65,7 +61,6 @@ final class Block {
         fileName: String,
         descriptorIndex: Int
     ) {
-        
         guard
             mode != .dataAndLink
         else {
@@ -76,38 +71,20 @@ final class Block {
         else {
             fatalError("Was not able to find empty slot to add a link for a file")
         }
-        
-        let truncatedFileName = fileName.padding(Constants.Common.fileNameSize)
-        let fileNameBytes: ByteArray = Array(truncatedFileName.utf8)
-        let descriptorIndexBytes: ByteArray = descriptorIndex.toBytes
-        let data = fileNameBytes + descriptorIndexBytes
-        setData(data: data, offset: emptyFileMappingSlot * Constants.Common.mappingSize)
+        setData(
+            data: fileName.padding(Constants.Common.fileNameSize).toBytes + descriptorIndex.toBytes,
+            offset: emptyFileMappingSlot * Constants.Common.mappingSize
+        )
     }
     
     func getDescriptorIndex(
         with name: String
     ) -> Int {
-        
-        let index = mappingsChunks
-            .first { chunk in
-                guard
-                    !chunk.isClear
-                else {
-                    return false
-                }
-                let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
-                return fileName == name
-            }
-            .map {
-                $0[Constants.Common.fileNameSize...].toInt
-            }
-        
-        guard
-            let index = index
-        else {
+        if let chunkWithNeededName = mappingsChunks.first(where: { $0.isClear ? false : $0.fileNameChunk.toFileName == name }) {
+            return chunkWithNeededName.descriptorIndexChunk.toInt
+        } else {
             fatalError("Can't find descriptor with this name")
         }
-        return index
     }
         
     @discardableResult
@@ -120,8 +97,7 @@ final class Block {
             else {
                 return false
             }
-            let fileName = chunk[..<Constants.Common.fileNameSize].toFileName
-            return fileName == name
+            return chunk.fileNameChunk.toFileName == name
         }
         
         if let chunk = chunk {
@@ -143,7 +119,10 @@ final class Block {
         else {
             fatalError("Out of space")
         }
-        blockSpace.replaceSubrange(offset..<offset + data.count, with: data)
+        blockSpace.replaceSubrange(
+            offset..<offset + data.count,
+            with: data
+        )
     }
 }
 
@@ -154,11 +133,14 @@ extension Block: CustomStringConvertible {
     var description: String {
         switch mode {
         case .dataAndLink:
-            let data = blockSpace[0..<Constants.Block.dataSize]
+            let data = blockSpace
+                .dataChunk
                 .toString
                 .trim(.controlCharacters)
                 .padding(Constants.Block.dataSize)
-            let linkNumber = linkChunk.toInt
+            let linkNumber = blockSpace
+                .linkChunk
+                .toInt
             let link = linkNumber == 0 ? "-" : linkNumber.toString
                 .padding(toLength: 2, withPad: " ", startingAt: 0)
             return data + "|" + link
