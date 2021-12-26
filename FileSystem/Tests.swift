@@ -11,6 +11,8 @@ struct Tests {
     
     static func testCreateWriteReadFile() {
         
+        print("\n\n\n****** TEST Create Write Read File ******")
+        
         let fileName = "Test.txt"
         let data = "Here is test data."
         
@@ -43,11 +45,16 @@ struct Tests {
             )
         )
         
+        // Close
+        CloseCommand.execute(openedFileIndex)
+        
         // Umount
         UMountCommand.execute()
     }
 
     static func testCreate4Files() {
+        
+        print("\n\n\n****** TEST Create 4 Files ******")
         
         let fileName1 = "Test1"
         let fileName2 = "So very big file name"
@@ -72,6 +79,8 @@ struct Tests {
     }
     
     static func testBigFile() {
+        
+        print("\n\n\n****** TEST Create Big File ******")
         
         let fileName1 = "Big.file"
         let data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam in posuere tellus. Mauris non dui augue. Nullam eget maximusus odio. Donec finibus, leo vel placerat facilisis, libero orci pellentesque nisi, eu eleifend urna urna sed est. Mauris porttitor ex nec justo volutpat, in tincidunt orci euismod. Etiam rutrum dui eget fermentum malesuada. Nullam odio dolor, cursus sit amet tincidunt ac, suscipit at ligula. Praesent quis pellentesque risus, ac accumsan mi."
@@ -110,11 +119,16 @@ struct Tests {
         // Check blocks
         DebugCommand.execute()
         
+        // Close
+        CloseCommand.execute(openedFileIndex)
+        
         // Umount
         UMountCommand.execute()
     }
     
     static func testOffset() {
+        
+        print("\n\n\n****** TEST Write With Offset ******")
         
         let fileName1 = "Big.file"
         let data1 = "Lorem ipsum dolor"
@@ -162,11 +176,17 @@ struct Tests {
         // Check blocks
         DebugCommand.execute()
         
+        // Close
+        CloseCommand.execute(openedFileIndex)
+        
         // Umount
         UMountCommand.execute()
     }
     
     static func testTruncate() {
+        
+        print("\n\n\n****** TEST Truncate File ******")
+        
         let fileName1 = "Big.file"
         let data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam in posuere tellus. Mauris non dui augue. Nullam eget maximusus odio. Donec finibus, leo vel placerat facilisis, libero orci pellentesque nisi, eu eleifend urna urna sed est. Mauris porttitor ex nec justo volutpat, in tincidunt orci euismod. Etiam rutrum dui eget fermentum malesuada. Nullam odio dolor, cursus sit amet tincidunt ac, suscipit at ligula. Praesent quis pellentesque risus, ac accumsan mi."
         let truncateSize = 40
@@ -219,14 +239,16 @@ struct Tests {
             )
         )
         
-        // Check blocks
-        DebugCommand.execute()
+        // Close
+        CloseCommand.execute(openedFileIndex)
         
         // Umount
         UMountCommand.execute()
     }
     
     static func testLinks() {
+        
+        print("\n\n\n****** TEST Links ******")
         
         let fileName = "Test.txt"
         let data = "Here is test data."
@@ -297,5 +319,11 @@ struct Tests {
             )
         )
         LSCommand.execute()
+
+        // Close
+        CloseCommand.execute(openedLinkIndex)
+        
+        // Umount
+        UMountCommand.execute()
     }
 }

@@ -7,14 +7,14 @@
 
 import Foundation
 
-//Tests.testCreateWriteReadFile()
+Tests.testCreateWriteReadFile()
 
 Tests.testCreate4Files()
 
 Tests.testBigFile()
 
-//Tests.testOffset()
+Tests.testOffset()
 
-//Tests.testTruncate()
+Tests.testTruncate()
 
-//Tests.testLinks()
+Tests.testLinks()

@@ -10,13 +10,13 @@ import Foundation
 struct DebugCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
-        
+        print("\n~$ debug")
         debugBlocks()
         debugDescriptors()
     }
     
     static func debugBlocks() {
-        print("\n~$ Blocks")
+        print("\nBlocks:")
         let number = "№:".padding(3)
         let isUsed = "Is used?"
         let dataDescription = "Data:"
@@ -35,7 +35,7 @@ struct DebugCommand: Command {
     }
     
     static func debugDescriptors() {
-        print("\n~$ Descriptors")
+        print("\nDescriptors:")
         let descriptorNumber = "№:".padding(4)
         let descriptorMode = "Mode:".padding(16)
         let linkedBlocks = "Linked blocks:"
