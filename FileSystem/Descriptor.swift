@@ -18,6 +18,7 @@ final class Descriptor: Equatable {
     enum Mode: CustomStringConvertible {
         case file
         case directory
+        case symlink
         case none
         
         var description: String {
@@ -26,6 +27,8 @@ final class Descriptor: Equatable {
                 return "File"
             case .directory:
                 return "Directory"
+            case .symlink:
+                return "Symlink"
             case .none:
                 return "Not defined"
             }
@@ -50,8 +53,7 @@ final class Descriptor: Equatable {
     }
     
     var parentDirectory: Descriptor!
-    
-    
+        
     // MARK: - Lifecycle
     
     init(
@@ -88,6 +90,14 @@ final class Descriptor: Equatable {
         referenceCount = 1
         linksBlocks = blocks
         size = 0
+    }
+    
+    func initiateAsSymlink(_ blocks: [Int] = []) {
+        isUsed = true
+        mode = .symlink
+        referenceCount = 1
+        linksBlocks = blocks
+        size = Constants.Block.size
     }
     
     func free() {

@@ -9,8 +9,8 @@ import Foundation
 
 struct MKDirCommand: Command {
     
-    static func execute(_ name: String) {
-        print("\n\(Path.currentPath)$ mkdir \(name)")
-        FileSystem.mkdir(name)
+    static func execute(_ path: String) {
+        print("\n\(Path.currentPath)$ mkdir \(path)")
+        FileSystem.mkdir(path)
     }
 }

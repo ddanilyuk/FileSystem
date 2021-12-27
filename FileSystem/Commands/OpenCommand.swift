@@ -9,9 +9,9 @@ import Foundation
 
 struct OpenCommand: Command {
         
-    static func execute(_ name: String) -> Int {
+    static func execute(_ path: String) -> Int {
         print("\n\(Path.currentPath)$ open")
-        let result = FileSystem.openFile(with: name)
+        let result = FileSystem.openFile(with: path)
         print("File opened with id: \(result)")
         return result
     }

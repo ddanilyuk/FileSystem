@@ -225,7 +225,7 @@ struct Tests {
         // Truncate
         TruncateCommand.execute(
             TruncateCommand.InputType(
-                name: fileName1,
+                path: fileName1,
                 size: truncateSize
             )
         )
@@ -290,7 +290,7 @@ struct Tests {
         // Create first link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                name: fileName,
+                path: fileName,
                 linkName: link1
             )
         )
@@ -299,7 +299,7 @@ struct Tests {
         // Create second link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                name: fileName,
+                path: fileName,
                 linkName: link2
             )
         )

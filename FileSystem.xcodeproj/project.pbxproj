@@ -30,6 +30,8 @@
 		5F60A6142762BB790001804A /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F60A6132762BB790001804A /* Command.swift */; };
 		5FE19951277A226E00524B57 /* CDCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19950277A226E00524B57 /* CDCommand.swift */; };
 		5FE19953277A22B300524B57 /* MKDirCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19952277A22B300524B57 /* MKDirCommand.swift */; };
+		5FE19955277A2B0700524B57 /* SymlinkCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19954277A2B0700524B57 /* SymlinkCommand.swift */; };
+		5FE19957277A74B900524B57 /* FileSystem+Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19956277A74B900524B57 /* FileSystem+Path.swift */; };
 		5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C430276FBA6500F427ED /* BitMap.swift */; };
 		5FF3C433276FBEBF00F427ED /* ByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C432276FBEBF00F427ED /* ByteArray.swift */; };
 /* End PBXBuildFile section */
@@ -71,6 +73,8 @@
 		5F60A6132762BB790001804A /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		5FE19950277A226E00524B57 /* CDCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CDCommand.swift; sourceTree = "<group>"; };
 		5FE19952277A22B300524B57 /* MKDirCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKDirCommand.swift; sourceTree = "<group>"; };
+		5FE19954277A2B0700524B57 /* SymlinkCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymlinkCommand.swift; sourceTree = "<group>"; };
+		5FE19956277A74B900524B57 /* FileSystem+Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileSystem+Path.swift"; sourceTree = "<group>"; };
 		5FF3C430276FBA6500F427ED /* BitMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitMap.swift; sourceTree = "<group>"; };
 		5FF3C432276FBEBF00F427ED /* ByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteArray.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,6 +95,7 @@
 			children = (
 				5F60A6132762BB790001804A /* Command.swift */,
 				5FE19950277A226E00524B57 /* CDCommand.swift */,
+				5FE19954277A2B0700524B57 /* SymlinkCommand.swift */,
 				5FE19952277A22B300524B57 /* MKDirCommand.swift */,
 				5F26217E2776026600BBD6E2 /* LSCommand.swift */,
 				5F26217A2776024700BBD6E2 /* MountCommand.swift */,
@@ -134,6 +139,7 @@
 				5F60A60F2762B7480001804A /* Constants.swift */,
 				5F60A60D2762B6410001804A /* Descriptor.swift */,
 				5F60A6092762B6300001804A /* FileSystem.swift */,
+				5FE19956277A74B900524B57 /* FileSystem+Path.swift */,
 				5F2621792776023900BBD6E2 /* Commands */,
 				5FF3C430276FBA6500F427ED /* BitMap.swift */,
 				5FF3C432276FBEBF00F427ED /* ByteArray.swift */,
@@ -211,12 +217,14 @@
 				5F2621972776A69E00BBD6E2 /* CloseCommand.swift in Sources */,
 				5F26218F277654C300BBD6E2 /* Extensions.swift in Sources */,
 				5F262189277602CB00BBD6E2 /* DebugCommand.swift in Sources */,
+				5FE19955277A2B0700524B57 /* SymlinkCommand.swift in Sources */,
 				5F26219127768A5400BBD6E2 /* TruncateCommand.swift in Sources */,
 				5F2621932776A4A900BBD6E2 /* LinkCommand.swift in Sources */,
 				5F262187277602AF00BBD6E2 /* ReadCommand.swift in Sources */,
 				5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */,
 				5F2621812776027900BBD6E2 /* CreateCommand.swift in Sources */,
 				5F2621952776A53600BBD6E2 /* UnlinkCommand.swift in Sources */,
+				5FE19957277A74B900524B57 /* FileSystem+Path.swift in Sources */,
 				5FE19951277A226E00524B57 /* CDCommand.swift in Sources */,
 				5F60A6142762BB790001804A /* Command.swift in Sources */,
 				5F26217B2776024700BBD6E2 /* MountCommand.swift in Sources */,
