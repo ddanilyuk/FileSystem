@@ -18,7 +18,7 @@ struct LSCommand: Command {
     }
     
     static func execute(_ inputs: Void = ()) {
-        print("\n~$ ls")
+        print("\n\(Path.currentPath)$ ls")
         let fileName = "File name:".padding(Constants.Common.fileNameSize)
         let descriptorMode = "Mode:".padding(10)
         let referenceCount = "References:".padding(12)

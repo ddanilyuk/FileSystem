@@ -16,7 +16,7 @@ struct ReadCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        print("\n~$ read \(inputs.numericOpenedFileDescriptor)")
+        print("\n\(Path.currentPath)$ read \(inputs.numericOpenedFileDescriptor)")
         let result = FileSystem.readFile(
             from: inputs.numericOpenedFileDescriptor,
             offset: inputs.offset,

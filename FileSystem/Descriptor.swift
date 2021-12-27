@@ -7,7 +7,11 @@
 
 import Foundation
 
-final class Descriptor {
+final class Descriptor: Equatable {
+    static func == (lhs: Descriptor, rhs: Descriptor) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     
     // MARK: - Mode
     
@@ -30,6 +34,8 @@ final class Descriptor {
     
     // MARK: - Propreties
     
+    var id = UUID()
+    
     var isUsed: Bool
     var mode: Mode
     var referenceCount: Int
@@ -38,6 +44,15 @@ final class Descriptor {
     // Contains ids of blocks with links. If its a file - the links is for other blocks of a file.
     // If its a directory - the mappings filename: descriptor id
     var linksBlocks: [Int]
+    
+    var currentDirectory: Descriptor {
+        return self
+    }
+    
+    var parentDirectory: Descriptor!
+    
+    
+    // MARK: - Lifecycle
     
     init(
         isUsed: Bool,

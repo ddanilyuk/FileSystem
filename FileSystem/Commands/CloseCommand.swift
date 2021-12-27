@@ -10,7 +10,7 @@ import Foundation
 struct CloseCommand: Command {
         
     static func execute(_ numericOpenedFileDescriptor: Int) {
-        print("\n~$ close \(numericOpenedFileDescriptor)")
+        print("\n\(Path.currentPath)$ close \(numericOpenedFileDescriptor)")
         FileSystem.closeFile(with: numericOpenedFileDescriptor)
         print("File with id: \(numericOpenedFileDescriptor) closed")
     }

@@ -15,7 +15,7 @@ struct TruncateCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        print("\n~$ truncate \(inputs.name) \(inputs.size)")
+        print("\n\(Path.currentPath)$ truncate \(inputs.name) \(inputs.size)")
         FileSystem.truncateFile(
             with: inputs.name,
             to: inputs.size

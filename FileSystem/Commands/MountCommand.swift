@@ -10,7 +10,7 @@ import Foundation
 struct MountCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
-        print("\n~$ mount")
+        print("\n\(Path.currentPath)$ mount")
         FileSystem.mountFromMemory()
         print("Successfully mounted")
     }

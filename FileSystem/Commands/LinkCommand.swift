@@ -15,7 +15,7 @@ struct LinkCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        print("\n~$ link \(inputs.name) \(inputs.linkName)")
+        print("\n\(Path.currentPath)$ link \(inputs.name) \(inputs.linkName)")
         FileSystem.link(
             to: inputs.name,
             linkName: inputs.linkName

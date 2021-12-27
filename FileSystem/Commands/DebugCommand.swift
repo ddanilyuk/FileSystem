@@ -10,7 +10,7 @@ import Foundation
 struct DebugCommand: Command {
     
     static func execute(_ inputs: Void = ()) {
-        print("\n~$ debug")
+        print("\n\(Path.currentPath)$ debug")
         debugBlocks()
         debugDescriptors()
     }
@@ -38,16 +38,21 @@ struct DebugCommand: Command {
         print("\nDescriptors:")
         let descriptorNumber = "№:".padding(4)
         let descriptorMode = "Mode:".padding(16)
+        let descriptorParent = "Parent:".padding(7)
         let linkedBlocks = "Linked blocks:"
-        print("\(descriptorNumber) \(descriptorMode) \(linkedBlocks)")
+        print("\(descriptorNumber) \(descriptorMode) \(descriptorParent) \(linkedBlocks)")
         
         let data = FileSystem.descriptors
             .enumerated()
             .map {
                 let descriptorNumber = "#\($0)".padding(4)
                 let descriptorMode = $1.mode.description.padding(16)
+                var parentIndex: String = "-".padding(7)
+                if let parentDirectory = $1.parentDirectory {
+                    parentIndex = FileSystem.descriptors.firstIndex(of: parentDirectory)!.toString.padding(7)
+                }
                 let linkedBlocks = $1.linksBlocks
-                return "\(descriptorNumber) \(descriptorMode) \(linkedBlocks)"
+                return "\(descriptorNumber) \(descriptorMode) \(parentIndex) \(linkedBlocks)"
             }
             .joined(separator: "\n")
         print(data)
