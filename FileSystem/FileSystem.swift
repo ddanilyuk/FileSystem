@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 final class FileSystem {
     
     // MARK: - Properties
@@ -146,7 +144,7 @@ extension FileSystem {
         let emptyBlockId = blocksBitMap.firstEmpty()
         blocks[emptyBlockId].mode = .mappings
         descriptor.initiateAsDirectory([emptyBlockId])
-        descriptor.parentDirectory = currentDirectory
+        descriptor.parentDirectory = pathResolver.descriptor
         mappingBlock(for: pathResolver.descriptor).createFileMapping(
             fileName: dirName,
             descriptorIndex: descriptorIndex
@@ -172,6 +170,7 @@ extension FileSystem {
         let newBlock = blocks[emptyBlockId]
         newBlock.mode = .symlink
         descriptor.initiateAsSymlink([emptyBlockId])
+        descriptor.parentDirectory = pathResolver.descriptor
         mappingBlock(for: pathResolver.descriptor).createFileMapping(
             fileName: fileName,
             descriptorIndex: descriptorIndex

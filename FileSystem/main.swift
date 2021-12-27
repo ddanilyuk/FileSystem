@@ -17,6 +17,7 @@ MKFSCommand.execute(10)
 
 MKDirCommand.execute("test")
 MKDirCommand.execute("hello")
+MKDirCommand.execute("hello/testSimlink")
 MKDirCommand.execute("world")
 CDCommand.execute("/test")
 MKDirCommand.execute("dirInsideTest")
@@ -27,20 +28,21 @@ CDCommand.execute("/test/dirInsideTest/newDir")
 LSCommand.execute()
 
 CDCommand.execute("/")
-//SymlinkCommand.execute(
-//    SymlinkCommand.InputType(
-//        str: "/hello",
-//        path: "symlink"
-//    )
-//)
+SymlinkCommand.execute(
+    SymlinkCommand.InputType(
+        str: "/hello",
+        path: "/test/dirInsideTest/symlink"
+    )
+)
+
 //
 //MKDirCommand.execute("foo")
 //MKDirCommand.execute("foo2")
 //
-//CDCommand.execute("foo")
-//CDCommand.execute("./..")
+CDCommand.execute("/test/dirInsideTest/symlink")
+LSCommand.execute()
 
-
+CDCommand.execute("..")
 LSCommand.execute()
 
 DebugCommand.execute()

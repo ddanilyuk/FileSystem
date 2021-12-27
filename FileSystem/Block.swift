@@ -88,7 +88,7 @@ final class Block {
             fatalError("Can't find descriptor with this name")
         }
     }
-        
+    
     @discardableResult
     func deleteFileMapping(
         with name: String

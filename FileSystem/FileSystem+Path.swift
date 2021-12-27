@@ -186,28 +186,41 @@ class Path {
         route: [String]
     ) {
         var route = route
-        let descriptor: Descriptor! = descriptor ?? FileSystem.currentDirectory
+        let parentDirectory: Descriptor! = descriptor ?? FileSystem.currentDirectory
         
         var pathParts = path.split(separator: "/", maxSplits: 1).map { String($0) }
         let directoryName = pathParts.removeFirst()
         route?.append(directoryName)
         
-        let descriptorIndex = FileSystem.blocks[descriptor.linksBlocks[0]].getDescriptorIndex(with: directoryName)
+        let descriptorIndex = FileSystem.blocks[parentDirectory.linksBlocks[0]].getDescriptorIndex(with: directoryName)
         let newDescriptor = FileSystem.descriptors[descriptorIndex]
-        guard newDescriptor.mode == .directory else {
-            fatalError("This is not directory")
+        
+        let resolve: ((String) -> (descriptor: Descriptor, route: [String])) = { pathParts in
+            if pathParts.isEmpty {
+                return (
+                    descriptor: newDescriptor,
+                    route: route ?? []
+                )
+            } else {
+                return resolveV3(
+                    path: pathParts,
+                    descriptor: newDescriptor,
+                    route: route
+                )
+            }
         }
-        if pathParts.isEmpty {
-            return (
-                descriptor: newDescriptor,
-                route: route ?? []
-            )
-        } else {
-            return resolveV3(
-                path: pathParts.joined(separator: "/"),
-                descriptor: newDescriptor,
-                route: route
-            )
+        
+        switch newDescriptor.mode {
+        case .directory:
+            return resolve(pathParts.joined(separator: "/"))
+            
+        case .symlink:
+            let data = FileSystem.blocks[newDescriptor.linksBlocks[0]].blockSpace.dataChunk
+            let symlinkPath = data.toString.trim([.controlCharacters, .whitespaces])
+            return resolve(symlinkPath + pathParts.joined(separator: "/"))
+                        
+        default:
+            fatalError("Unable to find resolve path")
         }
     }
 }
