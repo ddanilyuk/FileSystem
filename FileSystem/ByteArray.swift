@@ -77,6 +77,8 @@ extension Int {
     }
 }
 
+// MARK: - Srting
+
 extension String {
     
     var toBytes: ByteArray {
