@@ -250,21 +250,30 @@ struct Tests {
         
         print("\n\n\n****** TEST Links ******")
         
+        let folder1 = "folder1"
+        let folder2 = "folder2"
         let fileName = "Test.txt"
+        let filePath = "/\(folder1)/\(fileName)"
         let data = "Here is test data."
-        let link1 = "Link.link"
-        let link2 = "Another link"
+        let link1Name = "Link.link"
+        let link1Path = "\(link1Name)"
+        let link2Name = "Another.link"
+        let link2Path = "\(folder2)/\(link2Name)"
         
         // Setup
         MountCommand.execute()
         MKFSCommand.execute(10)
         
+        // Create directories
+        MKDirCommand.execute(folder1)
+        MKDirCommand.execute(folder2)
+        
         // Create
-        CreateCommand.execute(fileName)
+        CreateCommand.execute(filePath)
         LSCommand.execute()
         
         // Open
-        let openedFileIndex = OpenCommand.execute(fileName)
+        let openedFileIndex = OpenCommand.execute(filePath)
         
         // Write
         WriteCommand.execute(
@@ -290,8 +299,8 @@ struct Tests {
         // Create first link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                path: fileName,
-                linkPath: link1
+                path: filePath,
+                linkPath: link1Path
             )
         )
         LSCommand.execute()
@@ -299,18 +308,18 @@ struct Tests {
         // Create second link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                path: fileName,
-                linkPath: link2
+                path: filePath,
+                linkPath: link2Path
             )
         )
         LSCommand.execute()
         
         // Unlink first link
-        UnlinkCommand.execute(link1)
+        UnlinkCommand.execute(link1Path)
         LSCommand.execute()
         
         // Open second link and read data
-        let openedLinkIndex = OpenCommand.execute(link2)
+        let openedLinkIndex = OpenCommand.execute(link2Path)
         ReadCommand.execute(
             ReadCommand.InputType(
                 numericOpenedFileDescriptor: openedLinkIndex,
