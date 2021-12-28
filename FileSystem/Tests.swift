@@ -291,7 +291,7 @@ struct Tests {
         LinkCommand.execute(
             LinkCommand.InputType(
                 path: fileName,
-                linkName: link1
+                linkPath: link1
             )
         )
         LSCommand.execute()
@@ -300,7 +300,7 @@ struct Tests {
         LinkCommand.execute(
             LinkCommand.InputType(
                 path: fileName,
-                linkName: link2
+                linkPath: link2
             )
         )
         LSCommand.execute()

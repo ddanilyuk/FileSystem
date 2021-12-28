@@ -7,19 +7,17 @@
 
 import Foundation
 
-//
-//Tests.testCreateWriteReadFile()
-//
-//Tests.testCreate4Files()
-//
-//Tests.testBigFile()
-//
-//Tests.testOffset()
-//
-//Tests.testTruncate()
-//
-//Tests.testLinks()
-//
+Tests.testCreateWriteReadFile()
+
+Tests.testCreate4Files()
+
+Tests.testBigFile()
+
+Tests.testOffset()
+
+Tests.testTruncate()
+
+Tests.testLinks()
 
 Tests.testMKDirAndCDCommand()
 

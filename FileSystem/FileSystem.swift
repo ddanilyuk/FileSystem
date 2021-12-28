@@ -406,13 +406,16 @@ extension FileSystem {
 
     static func link(
         to path: String,
-        linkName: String
+        linkPath: String
     ) {
         let (fileName, pathToDirectory) = path.withoutLastPathComponent
         let pathResolver = Path.resolve(path: pathToDirectory)
-
+        
+        let (linkName, pathToLinkDirectory) = linkPath.withoutLastPathComponent
+        let linkPathResolver = Path.resolve(path: pathToLinkDirectory)
+        
         let descriptorIndex = getDescriptor(with: fileName, from: pathResolver.descriptor).descriptorIndex
-        currentDirectoryBlock.createFileMapping(
+        firstBlock(for: linkPathResolver.descriptor).createFileMapping(
             fileName: linkName,
             descriptorIndex: descriptorIndex
         )
@@ -420,10 +423,13 @@ extension FileSystem {
     }
     
     static func unlink(
-        name: String
+        path: String
     ) {
-        let descriptor = descriptors[currentDirectoryBlock.getDescriptorIndex(with: name)]
-        currentDirectoryBlock.deleteFileMapping(with: name)
+        let (linkName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        
+        let descriptor = descriptors[firstBlock(for: pathResolver.descriptor).getDescriptorIndex(with: linkName)]
+        firstBlock(for: pathResolver.descriptor).deleteFileMapping(with: linkName)
         descriptor.referenceCount -= 1
         
         if descriptor.referenceCount == 0 {
