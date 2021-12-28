@@ -8,17 +8,13 @@
 import Foundation
 
 
-FileSystem.mountFromMemory()
-FileSystem.generateDescriptors(10)
-
 MountCommand.execute()
 
 MKFSCommand.execute(10)
 
 MKDirCommand.execute("test")
 MKDirCommand.execute("hello")
-MKDirCommand.execute("hello/testSimlink")
-MKDirCommand.execute("world")
+//MKDirCommand.execute("hello/testSimlink")
 CDCommand.execute("/test")
 MKDirCommand.execute("dirInsideTest")
 CDCommand.execute("..")
@@ -28,40 +24,29 @@ CDCommand.execute("/test/dirInsideTest/newDir")
 LSCommand.execute()
 
 CDCommand.execute("/")
-SymlinkCommand.execute(
-    SymlinkCommand.InputType(
-        str: "/hello",
-        path: "/test/dirInsideTest/symlink"
-    )
-)
 
-//
-//MKDirCommand.execute("foo")
-//MKDirCommand.execute("foo2")
-//
-CDCommand.execute("/test/dirInsideTest/symlink")
+MKDirCommand.execute("world")
+MKDirCommand.execute("world/test")
+LSCommand.execute()
+RMDirCommand.execute("world")
 LSCommand.execute()
 
-CDCommand.execute("..")
-LSCommand.execute()
+
+//SymlinkCommand.execute(
+//    SymlinkCommand.InputType(
+//        str: "/hello/recursion",
+//        path: "/test/dirInsideTest/symlink"
+//    )
+//)
+//SymlinkCommand.execute(
+//    SymlinkCommand.InputType(
+//        str: "/test/dirInsideTest/symlink",
+//        path: "hello/recursion"
+//    )
+//)
 
 DebugCommand.execute()
 
-//let path1 = Path.resolve("/test")
-////print(FileSystem.descriptors.firstIndex(where: { $0.linksBlocks == some.linksBlocks }))
-//FileSystem.currentDirectory = path1
-//
-//LSCommand.execute()
-//
-//let path2 = Path.resolve("foo")
-////print(FileSystem.descriptors.firstIndex(where: { $0.linksBlocks == some.linksBlocks }))
-//FileSystem.currentDirectory = path2
-//
-//LSCommand.execute()
-//DebugCommand.execute()
-
-
-//print(some.)
 
 //
 //Tests.testCreateWriteReadFile()
@@ -75,3 +60,5 @@ DebugCommand.execute()
 //Tests.testTruncate()
 //
 //Tests.testLinks()
+//
+//Tests.testSymlinkRecursion()

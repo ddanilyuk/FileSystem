@@ -36,5 +36,9 @@ struct Constants {
         static var mappingSize: Int {
             fileNameSize + intSize
         }
+        
+        static var maximumRecursionCounter: Int {
+            return 50
+        }
     }
 }

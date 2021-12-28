@@ -326,4 +326,39 @@ struct Tests {
         // Umount
         UMountCommand.execute()
     }
+    
+    static func testSymlinkRecursion() {
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        MKDirCommand.execute("test")
+        MKDirCommand.execute("hello")
+        
+        // Create `/test/dirInsideTest`
+        MKDirCommand.execute("/test/dirInsideTest")
+        
+        // Create `/test/dirInsideTest/newDir`
+        MKDirCommand.execute("/test/dirInsideTest/newDir")
+        
+        // Add first symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/hello/recursion",
+                path: "/test/dirInsideTest/symlink"
+            )
+        )
+        
+        // Add second symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/test/dirInsideTest/symlink",
+                path: "/hello/recursion"
+            )
+        )
+        
+        // Run recursion
+        CreateCommand.execute("/test/dirInsideTest/symlink/recursion/newFile")
+    }
 }

@@ -151,6 +151,25 @@ extension FileSystem {
         )
     }
     
+    static func rmdir(
+        _ path: String
+    ) {
+        let (dirName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolveV3(path: pathToDirectory)
+        let (_, descriptor) = getDescriptor(
+            with: dirName,
+            from: pathResolver.descriptor
+        )
+        
+        guard blocks[descriptor.linksBlocks[0]].blockSpace.isClear else {
+            fatalError("This directory is not clear")
+        }
+        blocks[descriptor.parentDirectory.linksBlocks[0]].deleteFileMapping(with: dirName)
+        descriptor.linksBlocks.forEach { blocksBitMap.reset(position: $0) }
+        descriptor.free()
+    }
+
+    
     static func cd(
         _ path: String
     ) {
@@ -176,20 +195,6 @@ extension FileSystem {
             descriptorIndex: descriptorIndex
         )
         newBlock.setData(data: str.toBytes, offset: 0)
-    }
-}
-
-extension String {
-    
-    var withoutLastPathComponent: (pathComponent: String, path: String) {
-        let isFromRoot = starts(with: "/") ? "/" : ""
-        var path = split(separator: "/").map { String($0) }
-        let pathComponent = String(path.removeLast())
-        let newPath = isFromRoot + path.joined(separator: "/")
-        return (
-            pathComponent: pathComponent,
-            path: newPath.isEmpty ? "." : newPath
-        )
     }
 }
 

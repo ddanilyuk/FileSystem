@@ -32,6 +32,7 @@
 		5FE19953277A22B300524B57 /* MKDirCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19952277A22B300524B57 /* MKDirCommand.swift */; };
 		5FE19955277A2B0700524B57 /* SymlinkCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19954277A2B0700524B57 /* SymlinkCommand.swift */; };
 		5FE19957277A74B900524B57 /* FileSystem+Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19956277A74B900524B57 /* FileSystem+Path.swift */; };
+		5FE19959277B108000524B57 /* RMDirCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE19958277B108000524B57 /* RMDirCommand.swift */; };
 		5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C430276FBA6500F427ED /* BitMap.swift */; };
 		5FF3C433276FBEBF00F427ED /* ByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF3C432276FBEBF00F427ED /* ByteArray.swift */; };
 /* End PBXBuildFile section */
@@ -75,6 +76,7 @@
 		5FE19952277A22B300524B57 /* MKDirCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKDirCommand.swift; sourceTree = "<group>"; };
 		5FE19954277A2B0700524B57 /* SymlinkCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymlinkCommand.swift; sourceTree = "<group>"; };
 		5FE19956277A74B900524B57 /* FileSystem+Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileSystem+Path.swift"; sourceTree = "<group>"; };
+		5FE19958277B108000524B57 /* RMDirCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMDirCommand.swift; sourceTree = "<group>"; };
 		5FF3C430276FBA6500F427ED /* BitMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitMap.swift; sourceTree = "<group>"; };
 		5FF3C432276FBEBF00F427ED /* ByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteArray.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -97,6 +99,7 @@
 				5FE19950277A226E00524B57 /* CDCommand.swift */,
 				5FE19954277A2B0700524B57 /* SymlinkCommand.swift */,
 				5FE19952277A22B300524B57 /* MKDirCommand.swift */,
+				5FE19958277B108000524B57 /* RMDirCommand.swift */,
 				5F26217E2776026600BBD6E2 /* LSCommand.swift */,
 				5F26217A2776024700BBD6E2 /* MountCommand.swift */,
 				5F26218A2776296400BBD6E2 /* UMountCommand.swift */,
@@ -220,6 +223,7 @@
 				5FE19955277A2B0700524B57 /* SymlinkCommand.swift in Sources */,
 				5F26219127768A5400BBD6E2 /* TruncateCommand.swift in Sources */,
 				5F2621932776A4A900BBD6E2 /* LinkCommand.swift in Sources */,
+				5FE19959277B108000524B57 /* RMDirCommand.swift in Sources */,
 				5F262187277602AF00BBD6E2 /* ReadCommand.swift in Sources */,
 				5FF3C431276FBA6500F427ED /* BitMap.swift in Sources */,
 				5F2621812776027900BBD6E2 /* CreateCommand.swift in Sources */,

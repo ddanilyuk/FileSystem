@@ -79,30 +79,39 @@ class Path {
     static func resolveV3(
         path: String,
         descriptor: Descriptor? = nil,
-        route: [String]? = nil
+        route: [String]? = nil,
+        recursionCounter: Int = 0
     ) -> (
         descriptor: Descriptor,
         route: [String]
     ) {
+        var recursionCounter = recursionCounter
+        recursionCounter += 1
+        
+        guard recursionCounter < Constants.Common.maximumRecursionCounter else {
+            fatalError("Reached maximum recursion")
+        }
+        
         switch path {
         case let currentPath where currentPath.starts(with: ".."):
-            return resolveParent(path: path, descriptor: descriptor, route: route)
+            return resolveParent(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
             
         case let currentPath where currentPath.starts(with: "."):
-            return resolveCurrent(path: path, descriptor: descriptor, route: route)
+            return resolveCurrent(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
             
         case let currentPath where currentPath.starts(with: "/"):
-            return resolveRoot(path: path, descriptor: descriptor, route: route)
-
+            return resolveRoot(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
+            
         default:
-            return resolveDirectory(path: path, descriptor: descriptor, route: route)
+            return resolveDirectory(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
         }
     }
     
     static func resolveParent(
         path: String,
-        descriptor: Descriptor? = nil,
-        route: [String]? = nil
+        descriptor: Descriptor?,
+        route: [String]?,
+        recursionCounter: Int
     ) -> (
         descriptor: Descriptor,
         route: [String]
@@ -121,15 +130,17 @@ class Path {
             return resolveV3(
                 path: pathParts.joined(separator: "/"),
                 descriptor: FileSystem.currentDirectory.parentDirectory,
-                route: route
+                route: route,
+                recursionCounter: recursionCounter
             )
         }
     }
     
     static func resolveCurrent(
         path: String,
-        descriptor: Descriptor? = nil,
-        route: [String]? = nil
+        descriptor: Descriptor?,
+        route: [String]?,
+        recursionCounter: Int
     ) -> (
         descriptor: Descriptor,
         route: [String]
@@ -145,17 +156,19 @@ class Path {
             )
         } else {
             return resolveV3(
-                path: pathParts.joined(),
+                path: pathParts.joined(separator: "/"),
                 descriptor: FileSystem.currentDirectory,
-                route: route
+                route: route,
+                recursionCounter: recursionCounter
             )
         }
     }
     
     static func resolveRoot(
         path: String,
-        descriptor: Descriptor? = nil,
-        route: [String]? = nil
+        descriptor: Descriptor?,
+        route: [String]?,
+        recursionCounter: Int
     ) -> (
         descriptor: Descriptor,
         route: [String]
@@ -172,15 +185,17 @@ class Path {
             return resolveV3(
                 path: pathParts.joined(separator: "/"),
                 descriptor: FileSystem.rootDirectory,
-                route: []
+                route: [],
+                recursionCounter: recursionCounter
             )
         }
     }
     
     static func resolveDirectory(
         path: String,
-        descriptor: Descriptor? = nil,
-        route: [String]? = nil
+        descriptor: Descriptor?,
+        route: [String]?,
+        recursionCounter: Int
     ) -> (
         descriptor: Descriptor,
         route: [String]
@@ -205,7 +220,8 @@ class Path {
                 return resolveV3(
                     path: pathParts,
                     descriptor: newDescriptor,
-                    route: route
+                    route: route,
+                    recursionCounter: recursionCounter
                 )
             }
         }
@@ -217,7 +233,7 @@ class Path {
         case .symlink:
             let data = FileSystem.blocks[newDescriptor.linksBlocks[0]].blockSpace.dataChunk
             let symlinkPath = data.toString.trim([.controlCharacters, .whitespaces])
-            return resolve(symlinkPath + pathParts.joined(separator: "/"))
+            return resolve(symlinkPath + "/" + pathParts.joined(separator: "/"))
                         
         default:
             fatalError("Unable to find resolve path")

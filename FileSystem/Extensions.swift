@@ -115,4 +115,15 @@ extension String {
             startingAt: 0
         )
     }
+    
+    var withoutLastPathComponent: (pathComponent: String, path: String) {
+        let isFromRoot = starts(with: "/") ? "/" : ""
+        var path = split(separator: "/").map { String($0) }
+        let pathComponent = String(path.removeLast())
+        let newPath = isFromRoot + path.joined(separator: "/")
+        return (
+            pathComponent: pathComponent,
+            path: newPath.isEmpty ? "." : newPath
+        )
+    }
 }
