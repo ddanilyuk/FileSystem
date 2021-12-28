@@ -33,7 +33,7 @@ final class FileSystem {
     static var currentDirectory: Descriptor!
     
     static var currentDirectoryBlock: Block {
-        blocks[currentDirectory.linksBlocks[0]]
+        firstBlock(for: currentDirectory)
     }
     
     // MARK: - Lifecycle

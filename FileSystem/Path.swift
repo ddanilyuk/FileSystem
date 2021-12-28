@@ -178,7 +178,7 @@ final class Path {
             return resolveWith(pathParts.joined(separator: "/"))
             
         case .symlink:
-            let data = FileSystem.blocks[newDescriptor.linksBlocks[0]].blockSpace.dataChunk
+            let data = FileSystem.firstBlock(for: newDescriptor).blockSpace.dataChunk
             let symlinkPath = data.toString.trim([.controlCharacters, .whitespaces])
             return resolveWith(symlinkPath + "/" + pathParts.joined(separator: "/"))
                         
