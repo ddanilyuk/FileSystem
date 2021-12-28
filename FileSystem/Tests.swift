@@ -327,7 +327,77 @@ struct Tests {
         UMountCommand.execute()
     }
     
+    static func testMKDirAndCDCommand() {
+        
+        print("\n\n\n****** TEST mkdir and cd ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create directories
+        MKDirCommand.execute("/testDir")
+        MKDirCommand.execute("testDir/nestedDir1")
+        MKDirCommand.execute("testDir/nestedDir2")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir1")
+        MKDirCommand.execute("testDir/nestedDir2/anotherDir2")
+        
+        // Check cd path
+        CDCommand.execute("/testDir/nestedDir1/anotherDir1")
+        LSCommand.execute()
+                
+        // Check dot and dot-dot path
+        CDCommand.execute("../.././nestedDir2")
+        LSCommand.execute()
+        
+        // Check / path
+        CDCommand.execute("/")
+        LSCommand.execute()
+        
+        // Check relative path
+        CDCommand.execute("testDir")
+        LSCommand.execute()
+        
+        CDCommand.execute("nestedDir1/anotherDir1")
+        LSCommand.execute()
+        
+        // Umount
+        UMountCommand.execute()
+    }
+    
+    static func testRMDir() {
+        
+        print("\n\n\n****** TEST rmdir ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create directories
+        MKDirCommand.execute("/testDir")
+        MKDirCommand.execute("testDir/nestedDir1")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir1")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir2")
+        
+        // Change current directory
+        CDCommand.execute("testDir/nestedDir1")
+        LSCommand.execute()
+        
+        // Remove directory using absolute path
+        RMDirCommand.execute("/testDir/nestedDir1/anotherDir1")
+        LSCommand.execute()
+
+        // Remove directory using relative path
+        RMDirCommand.execute("anotherDir2")
+        LSCommand.execute()
+        
+        // Umount
+        UMountCommand.execute()
+    }
+    
     static func testSymlinkRecursion() {
+        
+        print("\n\n\n****** TEST symlink recursion ******")
         
         // Setup
         MountCommand.execute()

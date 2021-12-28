@@ -168,7 +168,6 @@ extension FileSystem {
         descriptor.linksBlocks.forEach { blocksBitMap.reset(position: $0) }
         descriptor.free()
     }
-
     
     static func cd(
         _ path: String
@@ -194,6 +193,9 @@ extension FileSystem {
             fileName: fileName,
             descriptorIndex: descriptorIndex
         )
+        guard str.count <= Constants.Block.size else {
+            fatalError("Symlink is too large")
+        }
         newBlock.setData(data: str.toBytes, offset: 0)
     }
 }
