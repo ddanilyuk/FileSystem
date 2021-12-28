@@ -16,7 +16,7 @@ final class Block {
         case dataAndLink
         /// The block contain mappings filename: descriptor id
         case mappings
-        
+        // Symbolic link
         case symlink
         /// Mode was not set
         case none

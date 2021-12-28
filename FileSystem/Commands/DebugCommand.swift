@@ -49,7 +49,7 @@ struct DebugCommand: Command {
                 let descriptorMode = $1.mode.description.padding(16)
                 var parentIndex: String = "-".padding(7)
                 if let parentDirectory = $1.parentDirectory {
-                    parentIndex = ("#" + FileSystem.descriptors.firstIndex(of: parentDirectory)!.toString).padding(7)
+                    parentIndex = ("#" + FileSystem.descriptors.firstIndex { $0 === parentDirectory }!.toString).padding(7)
                 }
                 let linkedBlocks = $1.linksBlocks
                 return "\(descriptorNumber) \(descriptorMode) \(parentIndex) \(linkedBlocks)"

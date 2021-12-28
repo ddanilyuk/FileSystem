@@ -360,7 +360,7 @@ struct Tests {
         
         CDCommand.execute("nestedDir1/anotherDir1")
         LSCommand.execute()
-        
+                
         // Umount
         UMountCommand.execute()
     }
@@ -393,6 +393,37 @@ struct Tests {
         
         // Umount
         UMountCommand.execute()
+    }
+    
+    static func testSymlink() {
+        
+        print("\n\n\n****** TEST symlink ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        MKDirCommand.execute("test")
+        MKDirCommand.execute("hello")
+        MKDirCommand.execute("hello/folder")
+
+        
+        // Create `/test/dirInsideTest`
+        MKDirCommand.execute("/test/dirInsideTest")
+        
+        // Create `/test/dirInsideTest/newDir`
+        MKDirCommand.execute("/test/dirInsideTest/newDir")
+        
+        // Add first symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/hello",
+                path: "/test/dirInsideTest/symlink"
+            )
+        )
+        
+        CDCommand.execute("/test/dirInsideTest/symlink")
+        LSCommand.execute()
     }
     
     static func testSymlinkRecursion() {
@@ -428,7 +459,10 @@ struct Tests {
             )
         )
         
+        CDCommand.execute("/test/dirInsideTest")
+        LSCommand.execute()
+        
         // Run recursion
-        CreateCommand.execute("/test/dirInsideTest/symlink/recursion/newFile")
+        CreateCommand.execute("/test/dirInsideTest/symlink/recursion/newFile.txt")
     }
 }

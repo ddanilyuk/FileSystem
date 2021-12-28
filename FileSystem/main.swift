@@ -25,4 +25,6 @@ Tests.testMKDirAndCDCommand()
 
 Tests.testRMDir()
 
+Tests.testSymlink()
+
 //Tests.testSymlinkRecursion()

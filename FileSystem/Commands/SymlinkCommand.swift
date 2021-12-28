@@ -16,6 +16,6 @@ struct SymlinkCommand: Command {
     
     static func execute(_ input: InputType) {
         print("\n\(Path.currentPath)$ ln -s \(input.str) \(input.path)")
-        FileSystem.simlink(str: input.str, path: input.path)
+        FileSystem.symlink(str: input.str, path: input.path)
     }
 }

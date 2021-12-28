@@ -7,6 +7,8 @@
 
 import Foundation
 
+typealias ResolvedPath = (descriptor: Descriptor, route: [String])
+
 final class Path {
     
     static var currentPath: String {
@@ -15,15 +17,12 @@ final class Path {
     
     static var pathRoute: [String] = []
     
-    static func resolveV3(
+    static func resolve(
         path: String,
         descriptor: Descriptor? = nil,
         route: [String]? = nil,
-        recursionCounter: Int = 0
-    ) -> (
-        descriptor: Descriptor,
-        route: [String]
-    ) {
+        recursionCounter: Int =  0
+    ) -> ResolvedPath {
         var recursionCounter = recursionCounter
         recursionCounter += 1
         
@@ -33,16 +32,36 @@ final class Path {
         
         switch path {
         case let currentPath where currentPath.starts(with: ".."):
-            return resolveParent(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
+            return resolveParent(
+                path: path,
+                descriptor: descriptor,
+                route: route,
+                recursionCounter: recursionCounter
+            )
             
         case let currentPath where currentPath.starts(with: "."):
-            return resolveCurrent(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
+            return resolveCurrent(
+                path: path,
+                descriptor: descriptor,
+                route: route,
+                recursionCounter: recursionCounter
+            )
             
         case let currentPath where currentPath.starts(with: "/"):
-            return resolveRoot(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
+            return resolveRoot(
+                path: path,
+                descriptor: descriptor,
+                route: route,
+                recursionCounter: recursionCounter
+            )
             
         default:
-            return resolveDirectory(path: path, descriptor: descriptor, route: route, recursionCounter: recursionCounter)
+            return resolveDescriptor(
+                path: path,
+                descriptor: descriptor,
+                route: route,
+                recursionCounter: recursionCounter
+            )
         }
     }
     
@@ -51,10 +70,7 @@ final class Path {
         descriptor: Descriptor?,
         route: [String]?,
         recursionCounter: Int
-    ) -> (
-        descriptor: Descriptor,
-        route: [String]
-    ) {
+    ) -> ResolvedPath {
         var route: [String] = route == nil ? Path.pathRoute : route!
         var pathParts = path.split(separator: "/", maxSplits: 1).map { String($0) }
         pathParts.removeFirst()
@@ -66,7 +82,7 @@ final class Path {
                 route: route
             )
         } else {
-            return resolveV3(
+            return resolve(
                 path: pathParts.joined(separator: "/"),
                 descriptor: descriptor?.parentDirectory ?? FileSystem.currentDirectory.parentDirectory,
                 route: route,
@@ -80,10 +96,7 @@ final class Path {
         descriptor: Descriptor?,
         route: [String]?,
         recursionCounter: Int
-    ) -> (
-        descriptor: Descriptor,
-        route: [String]
-    ) {
+    ) -> ResolvedPath {
         let route: [String] = route == nil ? Path.pathRoute : route!
         var pathParts = path
             .split(separator: "/", maxSplits: 1)
@@ -95,7 +108,7 @@ final class Path {
                 route: route
             )
         } else {
-            return resolveV3(
+            return resolve(
                 path: pathParts.joined(separator: "/"),
                 descriptor: descriptor ?? FileSystem.currentDirectory,
                 route: route,
@@ -109,10 +122,7 @@ final class Path {
         descriptor: Descriptor?,
         route: [String]?,
         recursionCounter: Int
-    ) -> (
-        descriptor: Descriptor,
-        route: [String]
-    ) {
+    ) -> ResolvedPath {
         let pathParts = path
             .split(separator: "/", maxSplits: 1)
             .map { String($0) }
@@ -122,7 +132,7 @@ final class Path {
                 route: route ?? []
             )
         } else {
-            return resolveV3(
+            return resolve(
                 path: pathParts.joined(separator: "/"),
                 descriptor: FileSystem.rootDirectory,
                 route: [],
@@ -131,15 +141,12 @@ final class Path {
         }
     }
     
-    static private func resolveDirectory(
+    static private func resolveDescriptor(
         path: String,
         descriptor: Descriptor?,
         route: [String]?,
         recursionCounter: Int
-    ) -> (
-        descriptor: Descriptor,
-        route: [String]
-    ) {
+    ) -> ResolvedPath {
         var route: [String] = route == nil ? Path.pathRoute : route!
         let parentDirectory: Descriptor! = descriptor ?? FileSystem.currentDirectory
         
@@ -150,14 +157,14 @@ final class Path {
         let descriptorIndex = FileSystem.blocks[parentDirectory.linksBlocks[0]].getDescriptorIndex(with: directoryName)
         let newDescriptor = FileSystem.descriptors[descriptorIndex]
         
-        let resolve: ((String) -> (descriptor: Descriptor, route: [String])) = { pathParts in
+        let resolveWith: ((_ pathParts: String) -> ResolvedPath) = { pathParts in
             if pathParts.isEmpty {
                 return (
                     descriptor: newDescriptor,
                     route: route
                 )
             } else {
-                return resolveV3(
+                return resolve(
                     path: pathParts,
                     descriptor: newDescriptor,
                     route: route,
@@ -168,12 +175,12 @@ final class Path {
         
         switch newDescriptor.mode {
         case .directory:
-            return resolve(pathParts.joined(separator: "/"))
+            return resolveWith(pathParts.joined(separator: "/"))
             
         case .symlink:
             let data = FileSystem.blocks[newDescriptor.linksBlocks[0]].blockSpace.dataChunk
             let symlinkPath = data.toString.trim([.controlCharacters, .whitespaces])
-            return resolve(symlinkPath + "/" + pathParts.joined(separator: "/"))
+            return resolveWith(symlinkPath + "/" + pathParts.joined(separator: "/"))
                         
         default:
             fatalError("Unable to find resolve path")

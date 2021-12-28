@@ -7,11 +7,7 @@
 
 import Foundation
 
-final class Descriptor: Equatable {
-    static func == (lhs: Descriptor, rhs: Descriptor) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
+final class Descriptor {
     
     // MARK: - Mode
     
@@ -36,9 +32,7 @@ final class Descriptor: Equatable {
     }
     
     // MARK: - Propreties
-    
-    var id = UUID()
-    
+        
     var isUsed: Bool
     var mode: Mode
     var referenceCount: Int
@@ -95,7 +89,7 @@ final class Descriptor: Equatable {
     func initiateAsSymlink(_ blocks: [Int] = []) {
         isUsed = true
         mode = .symlink
-        referenceCount = 1
+        referenceCount = 0
         linksBlocks = blocks
         size = Constants.Block.size
     }
