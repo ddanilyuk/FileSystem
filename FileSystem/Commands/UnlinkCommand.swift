@@ -9,9 +9,9 @@ import Foundation
 
 struct UnlinkCommand: Command {
         
-    static func execute(_ name: String) {
-        print("\n~$ unlink \(name)")
-        FileSystem.unlink(name: name)
-        print("File with name \"\(name)\" unlinked")
+    static func execute(_ path: String) {
+        print("\n\(Path.currentPath)$ unlink \(path)")
+        FileSystem.unlink(path: path)
+        print("File with name \"\(path)\" unlinked")
     }
 }

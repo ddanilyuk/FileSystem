@@ -225,7 +225,7 @@ struct Tests {
         // Truncate
         TruncateCommand.execute(
             TruncateCommand.InputType(
-                name: fileName1,
+                path: fileName1,
                 size: truncateSize
             )
         )
@@ -250,21 +250,30 @@ struct Tests {
         
         print("\n\n\n****** TEST Links ******")
         
+        let folder1 = "folder1"
+        let folder2 = "folder2"
         let fileName = "Test.txt"
+        let filePath = "/\(folder1)/\(fileName)"
         let data = "Here is test data."
-        let link1 = "Link.link"
-        let link2 = "Another link"
+        let link1Name = "Link.link"
+        let link1Path = "\(link1Name)"
+        let link2Name = "Another.link"
+        let link2Path = "\(folder2)/\(link2Name)"
         
         // Setup
         MountCommand.execute()
         MKFSCommand.execute(10)
         
+        // Create directories
+        MKDirCommand.execute(folder1)
+        MKDirCommand.execute(folder2)
+        
         // Create
-        CreateCommand.execute(fileName)
+        CreateCommand.execute(filePath)
         LSCommand.execute()
         
         // Open
-        let openedFileIndex = OpenCommand.execute(fileName)
+        let openedFileIndex = OpenCommand.execute(filePath)
         
         // Write
         WriteCommand.execute(
@@ -290,8 +299,8 @@ struct Tests {
         // Create first link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                name: fileName,
-                linkName: link1
+                path: filePath,
+                linkPath: link1Path
             )
         )
         LSCommand.execute()
@@ -299,18 +308,18 @@ struct Tests {
         // Create second link and check it
         LinkCommand.execute(
             LinkCommand.InputType(
-                name: fileName,
-                linkName: link2
+                path: filePath,
+                linkPath: link2Path
             )
         )
         LSCommand.execute()
         
         // Unlink first link
-        UnlinkCommand.execute(link1)
+        UnlinkCommand.execute(link1Path)
         LSCommand.execute()
         
         // Open second link and read data
-        let openedLinkIndex = OpenCommand.execute(link2)
+        let openedLinkIndex = OpenCommand.execute(link2Path)
         ReadCommand.execute(
             ReadCommand.InputType(
                 numericOpenedFileDescriptor: openedLinkIndex,
@@ -325,5 +334,144 @@ struct Tests {
         
         // Umount
         UMountCommand.execute()
+    }
+    
+    static func testMKDirAndCDCommand() {
+        
+        print("\n\n\n****** TEST mkdir and cd ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create directories
+        MKDirCommand.execute("/testDir")
+        MKDirCommand.execute("testDir/nestedDir1")
+        MKDirCommand.execute("testDir/nestedDir2")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir1")
+        MKDirCommand.execute("testDir/nestedDir2/anotherDir2")
+        
+        // Check cd path
+        CDCommand.execute("/testDir/nestedDir1/anotherDir1")
+        LSCommand.execute()
+                
+        // Check dot and dot-dot path
+        CDCommand.execute("../.././nestedDir2")
+        LSCommand.execute()
+        
+        // Check / path
+        CDCommand.execute("/")
+        LSCommand.execute()
+        
+        // Check relative path
+        CDCommand.execute("testDir")
+        LSCommand.execute()
+        
+        CDCommand.execute("nestedDir1/anotherDir1")
+        LSCommand.execute()
+                
+        // Umount
+        UMountCommand.execute()
+    }
+    
+    static func testRMDir() {
+        
+        print("\n\n\n****** TEST rmdir ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        // Create directories
+        MKDirCommand.execute("/testDir")
+        MKDirCommand.execute("testDir/nestedDir1")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir1")
+        MKDirCommand.execute("testDir/nestedDir1/anotherDir2")
+        
+        // Change current directory
+        CDCommand.execute("testDir/nestedDir1")
+        LSCommand.execute()
+        
+        // Remove directory using absolute path
+        RMDirCommand.execute("/testDir/nestedDir1/anotherDir1")
+        LSCommand.execute()
+
+        // Remove directory using relative path
+        RMDirCommand.execute("anotherDir2")
+        LSCommand.execute()
+        
+        // Umount
+        UMountCommand.execute()
+    }
+    
+    static func testSymlink() {
+        
+        print("\n\n\n****** TEST symlink ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        MKDirCommand.execute("test")
+        MKDirCommand.execute("hello")
+        MKDirCommand.execute("hello/folder")
+
+        
+        // Create `/test/dirInsideTest`
+        MKDirCommand.execute("/test/dirInsideTest")
+        
+        // Create `/test/dirInsideTest/newDir`
+        MKDirCommand.execute("/test/dirInsideTest/newDir")
+        
+        // Add first symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/hello",
+                path: "/test/dirInsideTest/symlink"
+            )
+        )
+        
+        CDCommand.execute("/test/dirInsideTest/symlink")
+        LSCommand.execute()
+    }
+    
+    static func testSymlinkRecursion() {
+        
+        print("\n\n\n****** TEST symlink recursion ******")
+        
+        // Setup
+        MountCommand.execute()
+        MKFSCommand.execute(10)
+        
+        MKDirCommand.execute("test")
+        MKDirCommand.execute("hello")
+        
+        // Create `/test/dirInsideTest`
+        MKDirCommand.execute("/test/dirInsideTest")
+        
+        // Create `/test/dirInsideTest/newDir`
+        MKDirCommand.execute("/test/dirInsideTest/newDir")
+        
+        // Add first symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/hello/recursion",
+                path: "/test/dirInsideTest/symlink"
+            )
+        )
+        
+        // Add second symlink
+        SymlinkCommand.execute(
+            SymlinkCommand.InputType(
+                str: "/test/dirInsideTest/symlink",
+                path: "/hello/recursion"
+            )
+        )
+        
+        CDCommand.execute("/test/dirInsideTest")
+        LSCommand.execute()
+        
+        // Run recursion
+        CreateCommand.execute("/test/dirInsideTest/symlink/recursion/newFile.txt")
     }
 }

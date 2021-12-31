@@ -16,6 +16,8 @@ final class Block {
         case dataAndLink
         /// The block contain mappings filename: descriptor id
         case mappings
+        // Symbolic link
+        case symlink
         /// Mode was not set
         case none
     }
@@ -86,7 +88,7 @@ final class Block {
             fatalError("Can't find descriptor with this name")
         }
     }
-        
+    
     @discardableResult
     func deleteFileMapping(
         with name: String
@@ -156,6 +158,14 @@ extension Block: CustomStringConvertible {
                     return "\(fileName)\(descriptorIndex)"
                 }
                 .joined(separator: "|")
+            
+        case .symlink:
+            let data = blockSpace
+                .dataChunk
+                .toString
+                .trim(.controlCharacters)
+                .padding(Constants.Block.dataSize)
+            return data
             
         case .none:
             return ""

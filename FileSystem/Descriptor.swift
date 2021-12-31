@@ -14,6 +14,7 @@ final class Descriptor {
     enum Mode: CustomStringConvertible {
         case file
         case directory
+        case symlink
         case none
         
         var description: String {
@@ -22,6 +23,8 @@ final class Descriptor {
                 return "File"
             case .directory:
                 return "Directory"
+            case .symlink:
+                return "Symlink"
             case .none:
                 return "Not defined"
             }
@@ -29,7 +32,7 @@ final class Descriptor {
     }
     
     // MARK: - Propreties
-    
+        
     var isUsed: Bool
     var mode: Mode
     var referenceCount: Int
@@ -38,6 +41,14 @@ final class Descriptor {
     // Contains ids of blocks with links. If its a file - the links is for other blocks of a file.
     // If its a directory - the mappings filename: descriptor id
     var linksBlocks: [Int]
+    
+    var currentDirectory: Descriptor {
+        return self
+    }
+    
+    var parentDirectory: Descriptor!
+        
+    // MARK: - Lifecycle
     
     init(
         isUsed: Bool,
@@ -73,6 +84,14 @@ final class Descriptor {
         referenceCount = 1
         linksBlocks = blocks
         size = 0
+    }
+    
+    func initiateAsSymlink(_ blocks: [Int] = []) {
+        isUsed = true
+        mode = .symlink
+        referenceCount = 0
+        linksBlocks = blocks
+        size = Constants.Block.size
     }
     
     func free() {

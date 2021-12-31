@@ -9,9 +9,9 @@ import Foundation
 
 struct CreateCommand: Command {
         
-    static func execute(_ name: String) {
-        print("\n~$ touch \(name)")
-        FileSystem.createFile(with: name)
+    static func execute(_ path: String) {
+        print("\n\(Path.currentPath)$ touch \(path)")
+        FileSystem.createFile(with: path)
         print("File successfully created")
     }
 }

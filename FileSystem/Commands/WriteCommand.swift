@@ -16,7 +16,7 @@ struct WriteCommand: Command {
     }
     
     static func execute(_ inputs: InputType) {
-        print("\n~$ write \(inputs.numericOpenedFileDescriptor)")
+        print("\n\(Path.currentPath)$ write \(inputs.numericOpenedFileDescriptor)")
         FileSystem.writeFile(
             to: inputs.numericOpenedFileDescriptor,
             offset: inputs.offset,

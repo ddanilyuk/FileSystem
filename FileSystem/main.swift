@@ -18,3 +18,11 @@ Tests.testOffset()
 Tests.testTruncate()
 
 Tests.testLinks()
+
+Tests.testMKDirAndCDCommand()
+
+Tests.testRMDir()
+
+Tests.testSymlink()
+
+//Tests.testSymlinkRecursion()

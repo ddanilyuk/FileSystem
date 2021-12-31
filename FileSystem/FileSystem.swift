@@ -26,8 +26,14 @@ final class FileSystem {
     
     // MARK: - Computed property
     
-    static var rootBlock: Block {
-        blocks[descriptors.first!.linksBlocks[0]]
+    static var rootDirectory: Descriptor {
+        descriptors.first!
+    }
+    
+    static var currentDirectory: Descriptor!
+    
+    static var currentDirectoryBlock: Block {
+        firstBlock(for: currentDirectory)
     }
     
     // MARK: - Lifecycle
@@ -53,6 +59,9 @@ final class FileSystem {
         let emptyBlockId = blocksBitMap.firstEmpty()
         blocks[emptyBlockId].mode = .mappings
         descriptors[0].initiateAsDirectory([emptyBlockId])
+        currentDirectory = rootDirectory
+        Path.pathRoute = []
+        rootDirectory.parentDirectory = rootDirectory
     }
     
     static func generateBlocksBitMap() -> BitMap {
@@ -102,7 +111,7 @@ extension FileSystem {
     }
     
     static func ls() -> [LSCommand.LineModel] {
-        rootBlock
+        currentDirectoryBlock
             .filesMappings
             .map { fileName, descriptorIndex in
                 let descriptor = descriptors[descriptorIndex]
@@ -115,6 +124,81 @@ extension FileSystem {
                 )
             }
     }
+    
+    static func firstBlock(
+        for descriptor: Descriptor
+    ) -> Block {
+        return blocks[descriptor.linksBlocks[0]]
+    }
+}
+
+// MARK: - Directories
+
+extension FileSystem {
+    
+    static func mkdir(
+        _ path: String
+    ) {
+        let (dirName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory, recursionCounter: 0)
+        let (descriptorIndex, descriptor) = findFreeDescriptor()
+        let emptyBlockId = blocksBitMap.firstEmpty()
+        blocks[emptyBlockId].mode = .mappings
+        descriptor.initiateAsDirectory([emptyBlockId])
+        descriptor.parentDirectory = pathResolver.descriptor
+        firstBlock(for: pathResolver.descriptor).createFileMapping(
+            fileName: dirName,
+            descriptorIndex: descriptorIndex
+        )
+    }
+    
+    static func rmdir(
+        _ path: String
+    ) {
+        let (dirName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        let (_, descriptor) = getDescriptor(
+            with: dirName,
+            from: pathResolver.descriptor
+        )
+        
+        guard firstBlock(for: descriptor).blockSpace.isClear else {
+            fatalError("This directory is not clear")
+        }
+        firstBlock(for: descriptor.parentDirectory).deleteFileMapping(with: dirName)
+        descriptor.linksBlocks.forEach { blocksBitMap.reset(position: $0) }
+        descriptor.free()
+    }
+    
+    static func cd(
+        _ path: String
+    ) {
+        let pathResolver = Path.resolve(path: path)
+        Path.pathRoute = pathResolver.route
+        currentDirectory = pathResolver.descriptor
+    }
+    
+    static func symlink(
+        str: String,
+        path: String
+    ) {
+        guard str.count <= Constants.Block.size else {
+            fatalError("Symlink is too large")
+        }
+        let (fileName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        let (descriptorIndex, descriptor) = findFreeDescriptor()
+        let emptyBlockId = blocksBitMap.firstEmpty()
+        let newBlock = blocks[emptyBlockId]
+        newBlock.mode = .symlink
+        descriptor.initiateAsSymlink([emptyBlockId])
+        descriptor.parentDirectory = pathResolver.descriptor
+        firstBlock(for: pathResolver.descriptor).createFileMapping(
+            fileName: fileName,
+            descriptorIndex: descriptorIndex
+        )
+        newBlock.setData(data: str.toBytes, offset: 0)
+    }
 }
 
 // MARK: - Create
@@ -122,14 +206,17 @@ extension FileSystem {
 extension FileSystem {
 
     static func createFile(
-        with name: String
+        with path: String
     ) {
+        let (fileName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        
         let (descriptorIndex, descriptor) = findFreeDescriptor()
         print("Find free descriptor with index: \(descriptorIndex)")
         descriptor.initiateAsFile()
         descriptor.referenceCount += 1
-        rootBlock.createFileMapping(
-            fileName: name,
+        firstBlock(for: pathResolver.descriptor).createFileMapping(
+            fileName: fileName,
             descriptorIndex: descriptorIndex
         )
     }
@@ -141,11 +228,16 @@ extension FileSystem {
     
     @discardableResult
     static func openFile(
-        with name: String
+        with path: String
     ) -> Int {
+        let (fileName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        
         let numericOpenedFileDescriptor = openedFiles.uniqueKey
-        openedFiles[numericOpenedFileDescriptor] = getDescriptor(with: name)
-            .descriptorIndex
+        openedFiles[numericOpenedFileDescriptor] = getDescriptor(
+            with: fileName,
+            from: pathResolver.descriptor
+        ).descriptorIndex
         return numericOpenedFileDescriptor
     }
     
@@ -267,9 +359,12 @@ extension FileSystem {
 
 extension FileSystem {
     
-    static func truncateFile(with name: String, to size: Int) {
+    static func truncateFile(with path: String, to size: Int) {
         
-        let descriptor = getDescriptor(with: name).descriptor
+        let (fileName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+
+        let descriptor = getDescriptor(with: fileName, from: pathResolver.descriptor).descriptor
         
         switch descriptor.size {
         case let currentSize where currentSize < size:
@@ -310,11 +405,17 @@ extension FileSystem {
 extension FileSystem {
 
     static func link(
-        to name: String,
-        linkName: String
+        to path: String,
+        linkPath: String
     ) {
-        let descriptorIndex = getDescriptor(with: name).descriptorIndex
-        rootBlock.createFileMapping(
+        let (fileName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        
+        let (linkName, pathToLinkDirectory) = linkPath.withoutLastPathComponent
+        let linkPathResolver = Path.resolve(path: pathToLinkDirectory)
+        
+        let descriptorIndex = getDescriptor(with: fileName, from: pathResolver.descriptor).descriptorIndex
+        firstBlock(for: linkPathResolver.descriptor).createFileMapping(
             fileName: linkName,
             descriptorIndex: descriptorIndex
         )
@@ -322,10 +423,13 @@ extension FileSystem {
     }
     
     static func unlink(
-        name: String
+        path: String
     ) {
-        let descriptor = descriptors[rootBlock.getDescriptorIndex(with: name)]
-        rootBlock.deleteFileMapping(with: name)
+        let (linkName, pathToDirectory) = path.withoutLastPathComponent
+        let pathResolver = Path.resolve(path: pathToDirectory)
+        
+        let descriptor = descriptors[firstBlock(for: pathResolver.descriptor).getDescriptorIndex(with: linkName)]
+        firstBlock(for: pathResolver.descriptor).deleteFileMapping(with: linkName)
         descriptor.referenceCount -= 1
         
         if descriptor.referenceCount == 0 {
@@ -353,12 +457,13 @@ extension FileSystem {
     }
     
     static private func getDescriptor(
-        with name: String
+        with name: String,
+        from directory: Descriptor
     ) -> (
         descriptorIndex: Int,
         descriptor: Descriptor
     ) {
-        let descriptorIndex = rootBlock.getDescriptorIndex(with: name)
+        let descriptorIndex = firstBlock(for: directory).getDescriptorIndex(with: name)
         return (
             descriptorIndex: descriptorIndex,
             descriptor: descriptors[descriptorIndex]
